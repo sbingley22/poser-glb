@@ -3,7 +3,7 @@ import { Environment, OrbitControls, TransformControls } from "@react-three/drei
 import { Canvas } from "@react-three/fiber"
 import { Suspense, useEffect, useRef, useState } from "react"
 import Character from "./Character"
-import { button, useControls } from "leva"
+import { button, folder, useControls } from "leva"
 import {
   ChromaticAberration,
   EffectComposer,
@@ -17,40 +17,28 @@ import { v4 as uuidv4 } from 'uuid'
 import ImgPlane from "./ImgPlane"
 import ShadowCatcher from "./ShadowCatcher"
 
+// default models
+import glbFarmer from "../assets/farmer.glb?url"
+import glbCyber from "../assets/cyber.glb?url"
+
 function Game() {
   const containerRef = useRef()
-
   const [characters, setCharacters] = useState([
-    {
-      id: uuidv4(),
-      char: "F Famer",
-      index: 1
-    }
+    // {
+    //   url: glbFarmer,
+    //   id: uuidv4(),
+    //   preset: null,
+    //   index: 1
+    // }
   ])
-  const charIndex = useRef(1)
-
+  const charIndex = useRef(0)
   const transformControlsRef = useRef()
   const [controlsHidden, setControlsHidden] = useState(true)
-
   const [images, setImages] = useState([])
 
-  const deleteCharacter = (id) => {
-    setCharacters(prevCharacters => prevCharacters.filter(character => character.id !== id))
-  }
 
-  const deleteImage = () => {
-    if (!transformControlsRef.current?.object) return
-    if (!transformControlsRef.current.object.name.includes("ImgPlane")) return
-
-    //console.log(transformControlsRef.current.object.userData.url, images[0].url)
-
-    const urlToDelete = transformControlsRef.current.object.userData.url
-    setImages(prevImages => prevImages.filter(image => image.url !== urlToDelete))
-    transformControlsRef.current.detach()
-  }
-
-  // Leva 
-  const { gizmoSize, controlSize } = useControls('Controls', {
+  // Gizmo Controls
+  const { gizmoSize, controlSize, clogObj, clogMat, clogCol } = useControls('Controls', {
     "Cycle Gizmo": button(() => {
       cycleGizmo()
     }),
@@ -71,8 +59,23 @@ function Game() {
       max: 2,
       step: 0.1
     },
+    "Console Logs": folder({
+      clogObj: {
+        label: "Log Obj",
+        value: false
+      },
+      clogMat: {
+        label: "Log Material",
+        value: false
+      },
+      clogCol: {
+        label: "Log Color",
+        value: false
+      },
+    }, { collapsed: true })
   }, { collapsed: true }, [controlsHidden])
 
+  // Image Controls
   const { imgLock, imgsVisible, imgBrightness } = useControls('Images', {
     imgLock: {
       label: "Lock Selection",
@@ -93,7 +96,18 @@ function Game() {
       deleteImage()
     }),
   }, { collapsed: true }, [images])
+  const deleteImage = () => {
+    if (!transformControlsRef.current?.object) return
+    if (!transformControlsRef.current.object.name.includes("ImgPlane")) return
 
+    //console.log(transformControlsRef.current.object.userData.url, images[0].url)
+
+    const urlToDelete = transformControlsRef.current.object.userData.url
+    setImages(prevImages => prevImages.filter(image => image.url !== urlToDelete))
+    transformControlsRef.current.detach()
+  }
+
+  // Image Brightness update
   useEffect(()=>{
     if (!transformControlsRef.current?.object) return
     if (!transformControlsRef.current.object.name.includes("ImgPlane")) return
@@ -102,29 +116,45 @@ function Game() {
     transformControlsRef.current?.object.material.color.setScalar(imgBrightness)
   },[imgBrightness])
 
+  // Adding Preset Character
   const handleCharacterChange = (char) => {
     if (char === '') return
-    addCharacter(char)
-  }
+    
+    let url, preset = null
+    if (char === 'Farmer') {
+      url = glbFarmer
+      preset = {
+        hidden: ["ana_2", "PlateForearms", "PlateShoulder"],
+        charNode: "Ana",
+        skinIndex: 0
+      }
+    }
+    if (char === 'Cyber') url = glbCyber
+    if (!url) return
 
-  const addCharacter = (char) => {
-    charIndex.current += 1
+    addCharacter(url, preset)
+  }
+  const addCharacter = (url, preset) => {
     setCharacters(prevCharacters => {
       const temp = [...prevCharacters]
       temp.push({
+        url: url,
         id: uuidv4(),
-        char: char,
+        preset: preset,
         index: charIndex.current
       })
       return temp
     })
+    charIndex.current += 1
+  }
+  const deleteCharacter = (id) => {
+    setCharacters(prevCharacters => prevCharacters.filter(character => character.id !== id))
   }
 
+  // Character Controls
   const characterStrings = [
-    "F Famer",
-    "F Gladiator",
-    "M Agent",
-    "M Cyber",
+    "Farmer",
+    "Cyber",
   ]
   useControls(`Characters`, {
     character: {
@@ -135,6 +165,7 @@ function Game() {
     }
   }, { collapsed: false })
   
+  // Compositor Controls
   const { dpr, pixelate, noiseValue, chromaticValue, sepiaValue, vignetteOffset, vignetteStrength } = useControls('Compositor', {
     dpr: {
       label: "Dynamic Pixels",
@@ -184,6 +215,7 @@ function Game() {
     },
   }, { collapsed: true })
 
+  // Enviroment Controls
   const environmentStrings = [
     "apartment",
     "city",
@@ -211,9 +243,9 @@ function Game() {
     },
     environmentScale: {
       label: "Scale",
-      value: 10,
+      value: 8,
       min: 4,
-      max: 20,
+      max: 12,
       step: 1
     },
     environmentRotation: {
@@ -244,6 +276,7 @@ function Game() {
     }
   }, { collapsed: true })
 
+  // Gizmo Modes
   const cycleGizmo = () => {
     if (!transformControlsRef.current) return
     if (transformControlsRef.current.mode === "translate") {
@@ -260,11 +293,13 @@ function Game() {
     }
   }
 
+  // Gizmo Size
   useEffect(()=>{
     if (!transformControlsRef.current) return
     transformControlsRef.current.size = gizmoSize
   },[gizmoSize])
 
+  // Click Events
   useEffect(()=>{
     const onPointerDown = (event) => {
       //console.log(event)
@@ -288,6 +323,7 @@ function Game() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Drag N Drop
   const handleDrop = (event) => {
     event.preventDefault()
     const files = Array.from(event.dataTransfer.files)
@@ -304,13 +340,32 @@ function Game() {
             { url, position: [index * 1.5, 0, 0], width: width / 100, height: height / 100 }
           ])
         }
+      } else if (file && file.type === 'model/gltf-binary') {
+        const url = URL.createObjectURL(file);
+        setCharacters((prev) => [
+          ...prev,
+          {
+            url: url,
+            id: uuidv4(),
+            preset: null,
+            index: charIndex.current
+          }
+        ])
+        charIndex.current += 1
       }
     })
   }
-
   const handleDragOver = (event) => {
     event.preventDefault()
   }
+
+  // Add initial character
+  useEffect(()=>{
+    if (charIndex.current === 0) {
+      handleCharacterChange("Farmer")
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div 
@@ -370,13 +425,17 @@ function Game() {
             <Character 
               key={c.id}
               id={c.id}
+              url={c.url}
               index={c.index}
-              char={c.char} 
+              preset={c.preset}
               position={[0.5*index,0,-0.5*index]} 
               rotation={[0, 0, 0]} 
               controlsHidden={controlsHidden}
               transformControlsRef={transformControlsRef}
               controlSize={controlSize}
+              clogObj={clogObj}
+              clogMat={clogMat}
+              clogCol={clogCol}
               deleteCharacter={deleteCharacter}
             />
           ))}

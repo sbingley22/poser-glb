@@ -1,22 +1,21 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/no-unknown-property */
-import { useGLTF } from "@react-three/drei"
-import glb from "../assets/char.glb?url"
 import { useEffect, useRef, useState } from "react"
 import { useThree } from "@react-three/fiber"
 import * as THREE from 'three'
 import { useSkinnedMeshClone } from "./SkinnedMeshClone"
 import { button, folder, useControls } from "leva"
 
-const Character = ({ id, char, index, position, rotation, controlsHidden, transformControlsRef, controlSize, deleteCharacter, bonesChest=true, bonesShoulder=true }) => {
+const Character = ({ id, url, index, preset, position, rotation, controlsHidden, transformControlsRef, controlSize, clogObj, clogMat, clogCol, deleteCharacter, bonesChest=true, bonesShoulder=true }) => {
   const { camera } = useThree()
   const raycaster = useRef(new THREE.Raycaster())
   const mouse = useRef(new THREE.Vector2())
-  const { scene, nodes, materials } = useSkinnedMeshClone(glb)
+  const { scene, nodes, materials } = useSkinnedMeshClone(url)
   const fkControls = useRef([])
   const lmbHoldTime = useRef(null)
   const [updateLeva, setUpdateLeva] = useState(null)
 
+  // Show / Hide Controls
   const hideControls = () => {
     const b = controlsHidden
     if (b) {
@@ -30,8 +29,6 @@ const Character = ({ id, char, index, position, rotation, controlsHidden, transf
       })
     }
   }
-
-  // Show / Hide Controls
   useEffect(()=>{
     hideControls()
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -211,16 +208,24 @@ const Character = ({ id, char, index, position, rotation, controlsHidden, transf
           const intersected = intersects[i].object
           //console.log("clicked", intersected.name)
 
+          if (clogObj) {
+            console.log(intersected.name, intersected)
+          }
+          if (clogMat) {
+            console.log(intersected.name, intersected.material)
+          }
+          if (clogCol) {
+            console.log(intersected.name, intersected.material.color)
+          }
+
           if (intersected.userData.control) {
             const control = intersected.userData.control
             transformControlsRef.current.attach(control)
             if (intersected.name.includes("FK-Rig")) {
               transformControlsRef.current.mode = "translate"
-              //transformControlsRef.current.size = 1.0
             }
             else if (intersected.name.includes("FK")) {
               transformControlsRef.current.mode = "rotate"
-              //transformControlsRef.current.size = 0.3
             }
             break
           }
@@ -237,7 +242,23 @@ const Character = ({ id, char, index, position, rotation, controlsHidden, transf
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [camera, scene.children])
+  }, [camera, scene.children, clogObj, clogMat, clogCol])
+
+  // Check for character body
+  const getCharacter = () => {
+    let character = ""
+    if (nodes["Char"]?.visible) character = "Char"
+    if (nodes["char"]?.visible) character = "char"
+    if (nodes["character"]?.visible) character = "character"
+    if (nodes["male"]?.visible) character = "male"
+    if (nodes["female"]?.visible) character = "female"
+    if (nodes["Adam"]?.visible) character = "Adam"
+    if (nodes["Ana"]?.visible) character = "Ana"
+    if (nodes["AnaGen"]?.visible) character = "AnaGen"
+    if (preset?.charNode) character = preset.charNode
+
+    return character
+  }
 
   // Character Presets
   useEffect(() => {
@@ -245,93 +266,33 @@ const Character = ({ id, char, index, position, rotation, controlsHidden, transf
       const node = nodes[meshName]
       if (node.type !== "Mesh" && node.type !== "Group" && node.type !== "SkinnedMesh") return
       node.castShadow = true
-      
-      if (node.type !== "Group" && node.parent?.type === "Group") return
-      if (meshName === "Scene") return
-
-      node.visible = false
     })
 
-    if (char === "F Famer") {
-      const visible = ["Ana", "Baggy", "ConeHat", "Shoes-Boots", "ShortShirt", "Wavy"]
-      if (nodes["AnaGen"]) visible[0] = "AnaGen"
-      const hidden = ["ana_2"]
-
-      visible.forEach( v => {
-        if (nodes[v]) nodes[v].visible = true
-      })
-      hidden.forEach( v => {
-        if (nodes[v]) nodes[v].visible = false
-      })
-
-      const skinMat = "Ana.Top"
-      if (materials[skinMat]) {
-        nodes["Ana"].children.forEach( ch => {
-          ch.material = materials[skinMat]
-        })
-      }
+    if (!preset) {
+      setUpdateLeva(prev => !prev)
+      return
     }
-    else if (char === "F Gladiator") {
-      const visible = ["Ana", "PlateAbs", "PlateBoots", "PlateChest", "PlateForearms", "PlateShins", "PlateShoulder", "PlateThighs", "Shield", "Sword", "Wavy"]
-      if (nodes["AnaGen"]) visible[0] = "AnaGen"
-      const hidden = []
 
-      visible.forEach( v => {
-        if (nodes[v]) nodes[v].visible = true
-      })
-      hidden.forEach( v => {
+    if (preset.hidden) {
+      preset.hidden.forEach( v => {
         if (nodes[v]) nodes[v].visible = false
       })
-
-      const skinMat = "Ana.Face"
-      if (materials[skinMat]) {
-        nodes["Ana"].children.forEach( ch => {
-          ch.material = materials[skinMat]
-        })
-      }
     }
-    else if (char === "M Agent") {
-      const visible = ["Adam", "Pistol"]
-      const hidden = []
 
-      visible.forEach( v => {
-        if (nodes[v]) nodes[v].visible = true
-      })
-      hidden.forEach( v => {
-        if (nodes[v]) nodes[v].visible = false
-      })
-
-      const skinMat = "Adam.Bottom"
-      if (materials[skinMat]) {
-        nodes["Adam"].children.forEach( ch => {
-          ch.material = materials[skinMat]
-        })
-      }
-    }
-    else if (char === "M Cyber") {
-      const visible = ["Adam"]
-      const hidden = []
-
-      visible.forEach( v => {
-        if (nodes[v]) nodes[v].visible = true
-      })
-      hidden.forEach( v => {
-        if (nodes[v]) nodes[v].visible = false
-      })
-
-      const skinMat = "Adam.Top"
-      if (materials[skinMat]) {
-        nodes["Adam"].children.forEach( ch => {
-          ch.material = materials[skinMat]
+    if (preset.charNode && preset.skinIndex) {
+      const charNode = nodes[preset.charNode]
+      if (charNode && charNode.type === "Group") {
+        charNode.children.forEach( ch => {
+          ch.material = charNode.children[preset.skinIndex].material
         })
       }
     }
 
     setUpdateLeva(prev => !prev)
     
-  }, [nodes, char, materials])
+  }, [nodes, preset, materials])
 
-  // Leva Mesh Controls
+  // Mesh Visibility
   useControls(
     () => {
       if (updateLeva === null) return {}
@@ -365,20 +326,20 @@ const Character = ({ id, char, index, position, rotation, controlsHidden, transf
     [updateLeva]
   )
 
-  // Leva Morph Controls
+  // Morph Controls
   useControls(
     () => {
       if (updateLeva === null) return {}
       const controls = {}
       const folderControls = {}
 
-      let character = "Ana"
-      if (nodes["Adam"]?.visible) character = "Adam"
-      if (nodes["AnaGen"]?.visible) character = "AnaGen"
+      const character = getCharacter()
+      if (character === "") return {}
 
       // If character contains sub meshes apply morphs to those as well
       if (nodes[character].type !== "Group") {
         const morphs = nodes[character].morphTargetDictionary
+        if (!morphs) return {}
       
         Object.keys(morphs).forEach(morphName => {
           folderControls[morphName] = {
@@ -394,7 +355,8 @@ const Character = ({ id, char, index, position, rotation, controlsHidden, transf
       }
       else {
         const morphs = nodes[character].children[0].morphTargetDictionary
-      
+        if (!morphs) return {}
+
         Object.keys(morphs).forEach(morphName => {
           folderControls[morphName] = {
             label: `${morphName}`,
@@ -415,11 +377,13 @@ const Character = ({ id, char, index, position, rotation, controlsHidden, transf
           'Morphs': folder(folderControls, { collapsed: true })
         }, { collapsed: true })
       })
+
       return controls
     },
     [updateLeva]
   )
 
+  // Delete Character
   useControls("Characters", {
     [`C-${index}`]: folder({
       "Delete": button(()=>{
@@ -428,7 +392,7 @@ const Character = ({ id, char, index, position, rotation, controlsHidden, transf
     })
   })
 
-  // Leva Skin Controls
+  // Skin Texture
   useControls(
     () => {
       if (updateLeva === null) return {}
@@ -438,9 +402,12 @@ const Character = ({ id, char, index, position, rotation, controlsHidden, transf
       const skinMaterials = []
       const skinNames = []
 
+      const char = getCharacter()
+      if (char === "") return {}
+
       // Get relevant skin textures
       Object.keys(materials).forEach(matName => {
-        if (matName.includes("Ana") || matName.includes("Adam")) {
+        if (matName.includes(char) || matName.includes("Ana") || matName.includes("Adam")) {
           const mat = materials[matName]
           const mapName = mat.map.name.replace('BaseColor.1001', '').replace('Skin', '')
           if (skinNames.includes(mapName)) return
@@ -451,7 +418,6 @@ const Character = ({ id, char, index, position, rotation, controlsHidden, transf
       })
 
       // Apply to this char model and determine if it is a Group or Skinned Mesh
-      const char = nodes["Ana"].visible ? "Ana" : nodes["AnaGen"]?.visible ? "AnaGen" : "Adam"
       const val = nodes[char].type === "Group"
       ? 
       nodes[char].children[0].material.map.name.replace('BaseColor.1001', '').replace('Skin', '')
@@ -496,5 +462,3 @@ const Character = ({ id, char, index, position, rotation, controlsHidden, transf
 }
 
 export default Character
-
-useGLTF.preload(glb)
