@@ -18,8 +18,8 @@ import ImgPlane from "./ImgPlane"
 import ShadowCatcher from "./ShadowCatcher"
 
 // Preset models
-//import { presetModels, presetEnviroments } from "../assets/presets"
-import { presetModels, presetEnviroments } from "../assets/dev/sgrs/presets"
+import { presetModels, presetEnviroments, hdrTexture } from "../assets/presets"
+//import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/sgrs/presets"
 
 function Game() {
   const containerRef = useRef()
@@ -222,6 +222,7 @@ function Game() {
     "studio",
     "sunset",
     "warehouse",
+    ""
   ]
   const { environmentShow, showShadowCatcher, environmentGround, environmentRotation, environmentScale, environmentBlur, lightIntensity, environmentPreset } = useControls('Environment', {
     environmentShow: {
@@ -394,6 +395,7 @@ function Game() {
               radius: 60, // Radius of the world. (Default 60)
               scale: environmentScale, // (Default: 1000)
             } : false}
+            files={hdrTexture}
           />
 
           <OrbitControls

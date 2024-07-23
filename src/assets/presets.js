@@ -1,5 +1,6 @@
 import glbFarmer from "./farmer.glb?url"
 import glbCyber from "./cyber.glb?url"
+import hdr from "./hotelcell.hdr?url"
 
 export const presetModels = {
   Farmer: {
@@ -18,3 +19,5 @@ export const presetModels = {
 export const presetEnviroments = {
   environment: "forest"
 }
+
+export const hdrTexture = hdr
