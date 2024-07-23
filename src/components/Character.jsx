@@ -344,7 +344,7 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
         Object.keys(morphs).forEach(morphName => {
           folderControls[morphName] = {
             label: `${morphName}`,
-            value: 0,
+            value: nodes[character].morphTargetInfluences[nodes[character].morphTargetDictionary[morphName]],
             min: 0,
             max: 1,
             onChange: (value) => {
@@ -360,7 +360,7 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
         Object.keys(morphs).forEach(morphName => {
           folderControls[morphName] = {
             label: `${morphName}`,
-            value: 0,
+            value: nodes[character].children[0].morphTargetInfluences[nodes[character].children[0].morphTargetDictionary[morphName]],
             min: 0,
             max: 1,
             onChange: (value) => {

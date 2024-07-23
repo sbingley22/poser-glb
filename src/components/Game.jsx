@@ -18,8 +18,8 @@ import ImgPlane from "./ImgPlane"
 import ShadowCatcher from "./ShadowCatcher"
 
 // Preset models
-import { presetModels, presetEnviroments } from "../assets/presets"
-//import { presetModels, presetEnviroments } from "../assets/dev/presets"
+//import { presetModels, presetEnviroments } from "../assets/presets"
+import { presetModels, presetEnviroments } from "../assets/dev/sgrs/presets"
 
 function Game() {
   const containerRef = useRef()
