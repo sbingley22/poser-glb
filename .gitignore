@@ -11,6 +11,7 @@ node_modules
 *.local
 
 src/assets/dev
+src/components/dev
 
 # Editor directories and files
 .vscode/*

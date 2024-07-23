@@ -17,9 +17,9 @@ import { v4 as uuidv4 } from 'uuid'
 import ImgPlane from "./ImgPlane"
 import ShadowCatcher from "./ShadowCatcher"
 
-// default models
-import glbFarmer from "../assets/farmer.glb?url"
-import glbCyber from "../assets/cyber.glb?url"
+// Preset models
+import { presetModels, presetEnviroments } from "../assets/presets"
+//import { presetModels, presetEnviroments } from "../assets/dev/presets"
 
 function Game() {
   const containerRef = useRef()
@@ -121,15 +121,14 @@ function Game() {
     if (char === '') return
     
     let url, preset = null
-    if (char === 'Farmer') {
-      url = glbFarmer
-      preset = {
-        hidden: ["ana_2", "PlateForearms", "PlateShoulder"],
-        charNode: "Ana",
-        skinIndex: 0
-      }
-    }
-    if (char === 'Cyber') url = glbCyber
+
+    Object.keys(presetModels).forEach(presetName => {
+      if (char !== presetName) return
+      const currentModel = presetModels[presetName]
+      url = currentModel.url
+      preset = currentModel.preset
+    })
+
     if (!url) return
 
     addCharacter(url, preset)
@@ -152,15 +151,11 @@ function Game() {
   }
 
   // Character Controls
-  const characterStrings = [
-    "Farmer",
-    "Cyber",
-  ]
   useControls(`Characters`, {
     character: {
       label: "Add",
       value: '',
-      options: characterStrings,
+      options: Object.keys(presetModels),
       onChange: handleCharacterChange
     }
   }, { collapsed: false })
@@ -271,7 +266,7 @@ function Game() {
     },
     environmentPreset: {
       label: "Environment",
-      value: 'forest',
+      value: presetEnviroments?.environment? presetEnviroments.environment : 'forest',
       options: environmentStrings,
     }
   }, { collapsed: true })
@@ -362,7 +357,10 @@ function Game() {
   // Add initial character
   useEffect(()=>{
     if (charIndex.current === 0) {
-      handleCharacterChange("Farmer")
+      const presetNames = Object.keys(presetModels)
+      if (presetNames.length === 0) return
+
+      handleCharacterChange(presetNames[0])
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
