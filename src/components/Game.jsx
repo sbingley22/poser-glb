@@ -4,22 +4,15 @@ import { Canvas } from "@react-three/fiber"
 import { Suspense, useEffect, useRef, useState } from "react"
 import Character from "./Character"
 import { button, folder, useControls } from "leva"
-import {
-  ChromaticAberration,
-  EffectComposer,
-  Noise,
-  Pixelation,
-  Sepia,
-  Vignette,
-} from '@react-three/postprocessing'
 import Screenshot from "./Screenshot"
 import { v4 as uuidv4 } from 'uuid'
 import ImgPlane from "./ImgPlane"
 import ShadowCatcher from "./ShadowCatcher"
 
 // Preset models
-import { presetModels, presetEnviroments, hdrTexture } from "../assets/presets"
-//import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/sgrs/presets"
+//import { presetModels, presetEnviroments, hdrTexture } from "../assets/presets"
+import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/sgrs/presets"
+import PostProcess from "./PostProcess"
 
 function Game() {
   const containerRef = useRef()
@@ -161,52 +154,13 @@ function Game() {
   }, { collapsed: false })
   
   // Compositor Controls
-  const { dpr, pixelate, noiseValue, chromaticValue, sepiaValue, vignetteOffset, vignetteStrength } = useControls('Compositor', {
+  const { dpr } = useControls('Compositor', {
     dpr: {
       label: "Dynamic Pixels",
       value: 1,
       min: 0.1,
       max: 1,
       step: 0.1,
-    },
-    pixelate: {
-      label: 'Pixelate',
-      value: 0,
-      min: 0,
-      max: 12,
-      step: 1
-    },
-    noiseValue: {
-      label: 'Noise',
-      value: 0,
-      min: 0,
-      max: 0.4,
-      step: 0.01
-    },
-    chromaticValue: {
-      label: 'Chromatic',
-      value: false
-    },
-    sepiaValue: {
-      label: 'Sepia',
-      value: 0,
-      min: 0,
-      max: 1,
-      step: 0.1
-    },
-    vignetteOffset: {
-      label: 'Vignette Offset',
-      value: 0,
-      min: 0,
-      max: 1,
-      step: 0.1
-    },
-    vignetteStrength: {
-      label: 'Vignette Strength',
-      value: 0,
-      min: 0,
-      max: 1,
-      step: 0.1
     },
   }, { collapsed: true })
 
@@ -455,13 +409,7 @@ function Game() {
 
         </Suspense>
 
-        <EffectComposer depthBuffer>
-          <Noise opacity={noiseValue} />
-          <Pixelation granularity={pixelate} />
-          <ChromaticAberration offset={chromaticValue ? [0.001, 0.001] : [0, 0]} />
-          <Sepia intensity={sepiaValue} />
-          <Vignette offset={vignetteOffset} darkness={vignetteStrength} />
-        </EffectComposer>
+        <PostProcess />
 
         <Screenshot />
 

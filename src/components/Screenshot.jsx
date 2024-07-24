@@ -8,7 +8,7 @@ const Screenshot = () => {
     }),
     Save: button(() => {
       handleScreenshot('save')
-    })
+    }),
   }, { collapsed: true })
 
   const handleScreenshot = async (type) => {
@@ -39,7 +39,7 @@ const Screenshot = () => {
     }
   }
 
-  return <></>
+  return
 }
 
 export default Screenshot

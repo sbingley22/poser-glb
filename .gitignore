@@ -12,6 +12,7 @@ node_modules
 
 src/assets/dev
 src/components/dev
+dist-save
 
 # Editor directories and files
 .vscode/*
