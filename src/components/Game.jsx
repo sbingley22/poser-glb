@@ -10,8 +10,8 @@ import ImgPlane from "./ImgPlane"
 import ShadowCatcher from "./ShadowCatcher"
 
 // Preset models
-//import { presetModels, presetEnviroments, hdrTexture } from "../assets/presets"
-import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/sgrs/presets"
+import { presetModels, presetEnviroments, hdrTexture } from "../assets/presets"
+//import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/sgrs/presets"
 import PostProcess from "./PostProcess"
 
 function Game() {
@@ -28,7 +28,6 @@ function Game() {
   const transformControlsRef = useRef()
   const [controlsHidden, setControlsHidden] = useState(true)
   const [images, setImages] = useState([])
-
 
   // Gizmo Controls
   const { gizmoSize, controlSize, clogObj, clogMat, clogCol } = useControls('Controls', {

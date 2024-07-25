@@ -34,6 +34,16 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[controlsHidden])
 
+  // Node Setup
+  useEffect(() => {
+    Object.keys(nodes).forEach(nodeName => {
+      const node = nodes[nodeName]
+      if (node.type === "Mesh" || node.type === "SkinnedMesh") {
+        node.frustumCulled = false
+      }
+    })
+  })
+
   // Change Control Size
   useEffect(()=>{
     if (fkControls.current.length < 1) return
