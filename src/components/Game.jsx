@@ -8,11 +8,12 @@ import Screenshot from "./Screenshot"
 import { v4 as uuidv4 } from 'uuid'
 import ImgPlane from "./ImgPlane"
 import ShadowCatcher from "./ShadowCatcher"
+import PostProcess from "./PostProcess"
 
 // Preset models
-import { presetModels, presetEnviroments, hdrTexture } from "../assets/presets"
+//import { presetModels, presetEnviroments, hdrTexture } from "../assets/presets"
 //import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/sgrs/presets"
-import PostProcess from "./PostProcess"
+import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/tj4/presets"
 
 function Game() {
   const containerRef = useRef()

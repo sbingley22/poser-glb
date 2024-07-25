@@ -56,9 +56,14 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
 
   // Setup FK Controls
   useEffect(()=>{
+    if (fkControls.current.length > 0) return
     console.log(nodes, materials)
 
-    if (fkControls.current.length > 0) return
+    let rigType = null
+    if (nodes["DEF-spine001"] && nodes["DEF-f_index01L"]) rigType = "rigify"
+    else if (nodes["DEF-spine001"] && nodes["DEF-forearmR"]) rigType = "rigifyBasic"
+    else console.log("Rig Unknown!")
+    //console.log(rigType)
 
     // Reparent
     nodes["DEF-upper_armL"].removeFromParent()
@@ -81,6 +86,48 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
     nodes["DEF-pelvisR"].attach(nodes["DEF-thighR"])    
     nodes["DEF-pelvisR"].removeFromParent()
     nodes["DEF-spine"].attach(nodes["DEF-pelvisR"])
+
+    // Extra reparenting required for rigify
+    if (rigType === "rigify") {
+      Object.keys(nodes).forEach(nodeName => {
+        const node = nodes[nodeName]
+        if (node.type !== "Bone") return
+        if (node.parent.name.includes("DEF-")) return
+        if (nodeName === "DEF-spine") return
+
+        if (nodeName.includes("eye")) {
+          if (nodeName.includes("DEF-eyeL")) return
+          if (nodeName.includes("DEF-eyeR")) return
+        }
+        else if (nodeName.includes("jaw")) {
+          if (nodeName === "DEF-jaw") {
+            node.removeFromParent()
+            nodes["DEF-jaw_master"].attach(node)
+            return
+          }
+          if (nodeName === "DEF-jawL" || nodeName === "DEF-jawR") {
+            node.removeFromParent()
+            nodes["DEF-jaw"].attach(node)
+            return
+          }
+          if (nodeName === "DEF-jawL001") {
+            node.removeFromParent()
+            nodes["DEF-jawL"].attach(node)
+            return
+          }
+          if (nodeName === "DEF-jawR001") {
+            node.removeFromParent()
+            nodes["DEF-jawR"].attach(node)
+            return
+          }
+        }
+
+        node.removeFromParent()
+        nodes["DEF-spine005"].attach(node)
+
+        //console.log(nodeName)
+      })
+    }
 
     // Create controls
     const createControlBox = (name, color = 0xff0000, scale = [0.1,0.1,0.1]) => {
@@ -179,6 +226,21 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
       controlBoxChR.userData = { control: nodes["DEF-breastR"] }
       fkControls.current.push(controlBoxChL)
       fkControls.current.push(controlBoxChR)
+    }
+
+    if (rigType === "rigify") {
+      const controlBoxEyeL = createControlBox("Control-FK-EyeL", 0xffff00, [0.02, 0.02, 0.02])
+      const controlBoxEyeR = createControlBox("Control-FK-EyeR", 0xffff00, [0.02, 0.02, 0.02])
+      //const controlJaw = createControlBox("Control-FK-Jaw", 0xffff00, [0.02, 0.02, 0.02])
+      nodes["DEF-eyeL"].add(controlBoxEyeL)
+      nodes["DEF-eyeR"].add(controlBoxEyeR)
+      //nodes["DEF-jaw_master"].add(controlJaw)
+      controlBoxEyeL.userData = { control: nodes["DEF-eyeL"] }
+      controlBoxEyeR.userData = { control: nodes["DEF-eyeR"] }
+      //controlJaw.userData = { control: nodes["DEF-jaw_master"] }
+      fkControls.current.push(controlBoxEyeL)
+      fkControls.current.push(controlBoxEyeR)
+      //fkControls.current.push(controlJaw)
     }
 
     fkControls.current.forEach( fk => {
@@ -306,15 +368,17 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
   useControls(
     () => {
       if (updateLeva === null) return {}
+      //debugger
       const controls = {}
       const folderControls = {}
-      //console.log("LEVA MESH CTRLS ENTERED")
+      //console.log("LEVA Mesh Visibility Ctrls ENTERED")
+      const character = getCharacter()
 
       Object.keys(nodes).forEach(meshName => {
         const node = nodes[meshName]
         if (node.type !== "Mesh" && node.type !== "Group" && node.type !== "SkinnedMesh") return
         if (node.type !== "Group" && node.parent?.type === "Group") {
-          if (node.parent.name !== "Ana" && node.parent.name !== "AnaGen" && node.parent.name !== "Adam") return
+          if (node.parent.name !== "Ana" && node.parent.name !== "AnaGen" && node.parent.name !== "Adam" && node.parent.name !== character) return
         }
         
         folderControls[meshName] = {
@@ -342,6 +406,7 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
       if (updateLeva === null) return {}
       const controls = {}
       const folderControls = {}
+      //console.log("Leva Morph Controls entered")
 
       const character = getCharacter()
       if (character === "") return {}
@@ -406,6 +471,7 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
   useControls(
     () => {
       if (updateLeva === null) return {}
+      //console.log("Leva Skin Ctrls Entered")
 
       const controls = {}
       const folderControls = {}
@@ -416,6 +482,7 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
       if (char === "") return {}
 
       // Get relevant skin textures
+      // Textures need to be include character name!!!!
       Object.keys(materials).forEach(matName => {
         if (matName.includes(char) || matName.includes("Ana") || matName.includes("Adam")) {
           const mat = materials[matName]
@@ -458,6 +525,8 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
           'Skin': folder(folderControls, { collapsed: true })
         }, { collapsed: true })
       })
+
+      //console.log("Skin Ctrls Finished")
 
       return controls
     },

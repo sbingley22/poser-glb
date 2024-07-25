@@ -1,15 +1,33 @@
 /* eslint-disable react/prop-types */
+import { useThree } from '@react-three/fiber'
 import { button, useControls } from 'leva'
+import { useState } from 'react';
+import * as THREE from 'three';
 
 const Screenshot = () => {
+  const { camera } = useThree()
+  const [savedPosition, setSavedPosition] = useState(new THREE.Vector3())
+  const [savedRotation, setSavedRotation] = useState(new THREE.Euler())
+
+  const saveCameraPosition = () => {
+    setSavedPosition(camera.position.clone())
+    setSavedRotation(camera.rotation.clone())
+  }
+  const resetCameraPosition = () => {
+    camera.position.copy(savedPosition)
+    camera.rotation.copy(savedRotation)
+  }
+
   useControls('Screenshot', {
     Clipboard: button(() => {
       handleScreenshot('clip')
     }),
-    Save: button(() => {
+    "Save Img": button(() => {
       handleScreenshot('save')
     }),
-  }, { collapsed: true })
+    SaveCameraPosition: button(saveCameraPosition),
+    ResetCameraPosition: button(resetCameraPosition),
+  }, { collapsed: true }, [savedPosition, savedRotation])
 
   const handleScreenshot = async (type) => {
     // Make sure canvas has:
