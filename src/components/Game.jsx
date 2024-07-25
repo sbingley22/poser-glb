@@ -31,7 +31,7 @@ function Game() {
   const [images, setImages] = useState([])
 
   // Gizmo Controls
-  const { gizmoSize, controlSize, clogObj, clogMat, clogCol } = useControls('Controls', {
+  const { gizmoSize, controlSize, ctrlRootAlwaysOn, clogObj, clogMat, clogCol } = useControls('Controls', {
     "Cycle Gizmo": button(() => {
       cycleGizmo()
     }),
@@ -51,6 +51,10 @@ function Game() {
       min: 0.2,
       max: 2,
       step: 0.1
+    },
+    ctrlRootAlwaysOn: {
+      label: "Root Always Visible",
+      value: true
     },
     "Console Logs": folder({
       clogObj: {
@@ -387,6 +391,7 @@ function Game() {
               controlsHidden={controlsHidden}
               transformControlsRef={transformControlsRef}
               controlSize={controlSize}
+              ctrlRootAlwaysOn={ctrlRootAlwaysOn}
               clogObj={clogObj}
               clogMat={clogMat}
               clogCol={clogCol}

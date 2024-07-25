@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import { useSkinnedMeshClone } from "./SkinnedMeshClone"
 import { button, folder, useControls } from "leva"
 
-const Character = ({ id, url, index, preset, position, rotation, controlsHidden, transformControlsRef, controlSize, clogObj, clogMat, clogCol, deleteCharacter, bonesChest=true, bonesShoulder=true }) => {
+const Character = ({ id, url, index, preset, position, rotation, controlsHidden, transformControlsRef, controlSize, ctrlRootAlwaysOn, clogObj, clogMat, clogCol, deleteCharacter, bonesChest=true, bonesShoulder=true }) => {
   const { camera } = useThree()
   const raycaster = useRef(new THREE.Raycaster())
   const mouse = useRef(new THREE.Vector2())
@@ -21,6 +21,8 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
     if (b) {
       fkControls.current.forEach(fk => {
         fk.visible = false
+        console.log(fk)
+        if (ctrlRootAlwaysOn && fk.name.includes("Rig")) fk.visible = true
       })
     }
     else {
@@ -295,6 +297,7 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
             transformControlsRef.current.attach(control)
             if (intersected.name.includes("FK-Rig")) {
               transformControlsRef.current.mode = "translate"
+              intersected.visible = true
             }
             else if (intersected.name.includes("FK")) {
               transformControlsRef.current.mode = "rotate"
