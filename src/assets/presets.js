@@ -1,5 +1,6 @@
 import glbFarmer from "./farmer.glb?url"
 import glbCyber from "./EdgeRunners.glb?url"
+import glbProps from "./cyberpunkProps.glb?url"
 import hdr from "./hotelcell.hdr?url"
 
 export const presetModels = {
@@ -93,6 +94,27 @@ export const presetModels = {
       hidden: ["ana_2", "PlateForearms", "PlateShoulder"],
       charNode: "Ana",
       skinIndex: 0,
+    }
+  },
+}
+
+export const presetProps = {
+  Car: {
+    url: glbProps,
+    preset: {
+      hidden: ["dumpster", "motorcycle"],
+    }
+  },
+  Motorcycle: {
+    url: glbProps,
+    preset: {
+      hidden: ["car", "dumpster"],
+    }
+  },
+  Dumpster: {
+    url: glbProps,
+    preset: {
+      hidden: ["car", "motorcycle"],
     }
   },
 }

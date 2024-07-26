@@ -11,29 +11,26 @@ import ShadowCatcher from "./ShadowCatcher"
 import PostProcess from "./PostProcess"
 
 // Preset models
-//import { presetModels, presetEnviroments, hdrTexture } from "../assets/presets"
-import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/sgrs/presets"
-//import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/tj4/presets"
+import { presetModels, presetProps, presetEnviroments, hdrTexture } from "../assets/presets"
+//import { presetModels, presetProps, presetEnviroments, hdrTexture } from "../assets/dev/sgrs/presets"
+//import { presetModels, presetProps, presetEnviroments, hdrTexture } from "../assets/dev/tj4/presets"
 import HUD from "./HUD"
+import Items from "./Items"
 
 function Game() {
   const containerRef = useRef()
-  const [characters, setCharacters] = useState([
-    // {
-    //   url: glbFarmer,
-    //   id: uuidv4(),
-    //   preset: null,
-    //   index: 1
-    // }
-  ])
+  const canvasRef = useRef()
+  const [characters, setCharacters] = useState([])
   const charIndex = useRef(0)
+  const [items, setItems] = useState([])
+  const propIndex = useRef(0)
   const transformControlsRef = useRef()
-  const [controlsHidden, setControlsHidden] = useState(true)
+  const [controlsHidden, setControlsHidden] = useState(false)
   const [controlSize, setControlSize] = useState(1.5)
   const [images, setImages] = useState([])
 
   // Gizmo Controls
-  const { gizmoSize, controlSizeLeva, ctrlRootAlwaysOn, clogObj, clogMat, clogCol } = useControls('Controls', {
+  const { gizmoSize, controlSizeLeva, ctrlRootAlwaysOn, hideCtrlOnDblClick, clogObj, clogMat, clogCol } = useControls('Controls', {
     "Cycle Gizmo": button(() => {
       cycleGizmo()
     }),
@@ -49,7 +46,7 @@ function Game() {
     }),
     controlSizeLeva: {
       label: "Control Size",
-      value: 1.5,
+      value: 0.5,
       min: 0.2,
       max: 2,
       step: 0.1
@@ -57,6 +54,10 @@ function Game() {
     ctrlRootAlwaysOn: {
       label: "Root Always Visible",
       value: false
+    },
+    hideCtrlOnDblClick: {
+      label: "Double Click Hides Controls",
+      value: true
     },
     "Console Logs": folder({
       clogObj: {
@@ -73,6 +74,99 @@ function Game() {
       },
     }, { collapsed: true })
   }, { collapsed: true }, [controlsHidden])
+
+  // Adding Preset Character
+  const handleCharacterChange = (char) => {
+    if (char === '') return
+    
+    let url, preset = null
+    let name = "C"
+
+    Object.keys(presetModels).forEach(presetName => {
+      if (char !== presetName) return
+      const currentModel = presetModels[presetName]
+      url = currentModel.url
+      preset = currentModel.preset
+      name = presetName
+    })
+
+    if (!url) return
+
+    addCharacter(url, preset, name)
+  }
+  const addCharacter = (url, preset, name="C") => {
+    charIndex.current += 1
+    setCharacters(prevCharacters => {
+      const temp = [...prevCharacters]
+      temp.push({
+        url: url,
+        id: uuidv4(),
+        preset: preset,
+        index: charIndex.current,
+        name: name
+      })
+      return temp
+    })
+  }
+  const deleteCharacter = (id) => {
+    setCharacters(prevCharacters => prevCharacters.filter(character => character.id !== id))
+  }
+  // Character Controls
+  useControls(`Characters`, {
+    character: {
+      label: "Add",
+      value: '',
+      options: Object.keys(presetModels),
+      onChange: handleCharacterChange
+    }
+  }, { collapsed: false })
+
+  // Adding Preset Prop
+  const handlePropChange = (prop) => {
+    if (prop === '') return
+    //debugger
+    
+    let url, preset = null
+    let name = "C"
+
+    Object.keys(presetProps).forEach(presetName => {
+      if (prop !== presetName) return
+      const currentProp = presetProps[presetName]
+      url = currentProp.url
+      preset = currentProp.preset
+      name = presetName
+    })
+
+    if (!url) return
+
+    addProp(url, preset, name)
+  }
+  const addProp = (url, preset, name="P") => {
+    propIndex.current += 1
+    setItems(prevProps => {
+      const temp = [...prevProps]
+      temp.push({
+        url: url,
+        id: uuidv4(),
+        preset: preset,
+        index: propIndex.current,
+        name: name
+      })
+      return temp
+    })
+  }
+  const deleteProp = (id) => {
+    setItems(prevProps => prevProps.filter(prop => prop.id !== id))
+  }
+  // Prop Controls
+  useControls(`Props`, {
+    prop: {
+      label: "Add",
+      value: '',
+      options: Object.keys(presetProps),
+      onChange: handlePropChange
+    }
+  }, { collapsed: false })
 
   // Image Controls
   const { imgLock, imgsVisible, imgBrightness } = useControls('Images', {
@@ -114,50 +208,6 @@ function Game() {
     //console.log(transformControlsRef.current.object)
     transformControlsRef.current?.object.material.color.setScalar(imgBrightness)
   },[imgBrightness])
-
-  // Adding Preset Character
-  const handleCharacterChange = (char) => {
-    if (char === '') return
-    
-    let url, preset = null
-
-    Object.keys(presetModels).forEach(presetName => {
-      if (char !== presetName) return
-      const currentModel = presetModels[presetName]
-      url = currentModel.url
-      preset = currentModel.preset
-    })
-
-    if (!url) return
-
-    addCharacter(url, preset)
-  }
-  const addCharacter = (url, preset) => {
-    setCharacters(prevCharacters => {
-      const temp = [...prevCharacters]
-      temp.push({
-        url: url,
-        id: uuidv4(),
-        preset: preset,
-        index: charIndex.current
-      })
-      return temp
-    })
-    charIndex.current += 1
-  }
-  const deleteCharacter = (id) => {
-    setCharacters(prevCharacters => prevCharacters.filter(character => character.id !== id))
-  }
-
-  // Character Controls
-  useControls(`Characters`, {
-    character: {
-      label: "Add",
-      value: '',
-      options: Object.keys(presetModels),
-      onChange: handleCharacterChange
-    }
-  }, { collapsed: false })
   
   // Compositor Controls
   const { dpr } = useControls('Compositor', {
@@ -239,7 +289,8 @@ function Game() {
       transformControlsRef.current.mode = "rotate"
     }
     else if (transformControlsRef.current.mode === "rotate") {
-      transformControlsRef.current.mode = "scale"
+      //transformControlsRef.current.mode = "scale"
+      transformControlsRef.current.mode = "translate"
     }
     else if (transformControlsRef.current.mode === "scale") {
       transformControlsRef.current.mode = "translate"
@@ -264,21 +315,31 @@ function Game() {
   useEffect(()=>{
     const onPointerDown = (event) => {
       //console.log(event)
+      event.preventDefault()
+
       if (event.button >= 3) {
         cycleGizmo()
       }
     }
 
-    const onDoubleClick = () => {
+    const onDoubleClick = (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      event.returnValue = false
+
       transformControlsRef.current.detach()
+      if (hideCtrlOnDblClick) {
+        setControlsHidden(prev => !prev)
+      }
     }
 
-    window.addEventListener("pointerdown", onPointerDown)
-    window.addEventListener("dblclick", onDoubleClick)
+    const canvas = canvasRef.current
+    canvas.addEventListener("pointerdown", onPointerDown)
+    canvas.addEventListener("dblclick", onDoubleClick)
 
     return () => {
-      window.removeEventListener("pointerdown", onPointerDown)
-      window.removeEventListener("dblclick", onDoubleClick)
+      canvas.removeEventListener("pointerdown", onPointerDown)
+      canvas.removeEventListener("dblclick", onDoubleClick)
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -339,6 +400,7 @@ function Game() {
       onDragOver={handleDragOver} 
     >
       <Canvas 
+        ref={canvasRef}
         camera={{position: [0.5, 1.75, 1.5], near: 0.01, far: 20}}
         gl={{ preserveDrawingBuffer: true }}
         shadows
@@ -392,10 +454,14 @@ function Game() {
               id={c.id}
               url={c.url}
               index={c.index}
+              name={c.name}
               preset={c.preset}
               position={[0.5*index,0,-0.5*index]} 
               rotation={[0, 0, 0]} 
+              canvasRef={canvasRef}
               controlsHidden={controlsHidden}
+              setControlsHidden={setControlsHidden}
+              hideCtrlOnDblClick={hideCtrlOnDblClick}
               transformControlsRef={transformControlsRef}
               controlSize={controlSize}
               ctrlRootAlwaysOn={ctrlRootAlwaysOn}
@@ -403,6 +469,30 @@ function Game() {
               clogMat={clogMat}
               clogCol={clogCol}
               deleteCharacter={deleteCharacter}
+            />
+          ))}
+
+          {items && items.map( (p, index) => (
+            <Items 
+              key={p.id}
+              id={p.id}
+              url={p.url}
+              index={p.index}
+              preset={p.preset}
+              name={p.name}
+              position={[0.5*index,0,-0.5*index]} 
+              rotation={[0, 0, 0]} 
+              canvasRef={canvasRef}
+              controlsHidden={controlsHidden}
+              setControlsHidden={setControlsHidden}
+              hideCtrlOnDblClick={hideCtrlOnDblClick}
+              transformControlsRef={transformControlsRef}
+              controlSize={controlSize}
+              ctrlRootAlwaysOn={ctrlRootAlwaysOn}
+              clogObj={clogObj}
+              clogMat={clogMat}
+              clogCol={clogCol}
+              deleteProp={deleteProp}
             />
           ))}
 

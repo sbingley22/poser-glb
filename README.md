@@ -8,7 +8,7 @@ Drag and drop glb files to load character, they must be rigged with a blender ri
 Drag and drop img textures.
 
 To Do:
-Add compatibility for advanced rigify rigs
 Add compatibility for daz rigs
+Expand gltf prop support (morphs)
 
 git subtree push --prefix dist origin gh-pages

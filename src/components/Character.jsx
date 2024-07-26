@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import { useSkinnedMeshClone } from "./SkinnedMeshClone"
 import { button, folder, useControls } from "leva"
 
-const Character = ({ id, url, index, preset, position, rotation, controlsHidden, transformControlsRef, controlSize, ctrlRootAlwaysOn, clogObj, clogMat, clogCol, deleteCharacter, bonesChest=true, bonesShoulder=true }) => {
+const Character = ({ id, url, index, name, preset, position, rotation, canvasRef, controlsHidden, hideCtrlOnDblClick, transformControlsRef, controlSize, ctrlRootAlwaysOn, clogObj, clogMat, clogCol, deleteCharacter, bonesChest=true, bonesShoulder=true }) => {
   const { camera } = useThree()
   const raycaster = useRef(new THREE.Raycaster())
   const mouse = useRef(new THREE.Vector2())
@@ -16,9 +16,8 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
   const [updateLeva, setUpdateLeva] = useState(null)
 
   // Show / Hide Controls
-  const hideControls = () => {
-    const b = controlsHidden
-    if (b) {
+  const hideControls = (hide) => {
+    if (hide) {
       fkControls.current.forEach(fk => {
         fk.visible = false
         if (ctrlRootAlwaysOn && fk.name.includes("Rig")) fk.visible = true
@@ -31,7 +30,7 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
     }
   }
   useEffect(()=>{
-    hideControls()
+    hideControls(controlsHidden)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[controlsHidden])
 
@@ -131,21 +130,21 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
     }
 
     // Create controls
-    const createControlBox = (name, color = 0xff0000, scale = [0.1,0.1,0.1]) => {
+    const createControlBox = (name, color = 0x00ff00, scale = [0.1,0.1,0.1]) => {
       const geometry = new THREE.BoxGeometry(...scale)
       const material = new THREE.MeshBasicMaterial({ 
         color: color, 
         wireframe: true, 
         depthTest: false ,
         transparent: true,
-        opacity: 0.5
+        opacity: 0.2
       })
       const box = new THREE.Mesh(geometry, material)
       box.name = name
       return box
     }
 
-    const controlBoxRig = createControlBox("Control-FK-Rig", 0x00ff00, [0.2,0.02,0.2])
+    const controlBoxRig = createControlBox("Control-FK-Rig", 0xff0000, [0.2,0.02,0.2])
     const controlBoxHip = createControlBox("Control-FK-Hip")
     const controlBoxSp2 = createControlBox("Control-FK-Sp2")
     const controlBoxSp5 = createControlBox("Control-FK-Sp5")
@@ -254,7 +253,7 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
       fk.scale.setScalar(controlSize)
     })
 
-    hideControls()
+    hideControls(controlsHidden)
 
     transformControlsRef.current.attach(nodes["rig"])
 
@@ -300,6 +299,12 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
           if (intersected.userData.control) {
             const control = intersected.userData.control
             transformControlsRef.current.attach(control)
+
+            if (hideCtrlOnDblClick) {
+              //setControlsHidden(false)
+              hideControls(false)
+            }
+
             if (intersected.name.includes("FK-Rig")) {
               transformControlsRef.current.mode = "translate"
               intersected.visible = true
@@ -313,12 +318,13 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
       }
     }
 
-    window.addEventListener("pointerup", onPointerUp)
-    window.addEventListener("pointerdown", onPointerDown)
+    const canvas = canvasRef.current
+    canvas.addEventListener("pointerup", onPointerUp)
+    canvas.addEventListener("pointerdown", onPointerDown)
 
     return () => {
-      window.removeEventListener("pointerup", onPointerUp)
-      window.addEventListener("pointerdown", onPointerDown)
+      canvas.removeEventListener("pointerup", onPointerUp)
+      canvas.addEventListener("pointerdown", onPointerDown)
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -399,7 +405,7 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
       })
 
       controls["Characters"] = folder({
-        [`C-${index}`]: folder({
+        [`${name}-${index}`]: folder({
           'Visibility': folder(folderControls, { collapsed: true })
         }, { collapsed: true })
       })
@@ -456,7 +462,7 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
       }
 
       controls["Characters"] = folder({
-        [`C-${index}`]: folder({
+        [`${name}-${index}`]: folder({
           'Morphs': folder(folderControls, { collapsed: true })
         }, { collapsed: true })
       })
@@ -468,7 +474,7 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
 
   // Delete Character
   useControls("Characters", {
-    [`C-${index}`]: folder({
+    [`${name}-${index}`]: folder({
       "Delete": button(()=>{
         deleteCharacter(id)
       }) 
@@ -529,7 +535,7 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
       }
 
       controls["Characters"] = folder({
-        [`C-${index}`] : folder({
+        [`${name}-${index}`] : folder({
           'Skin': folder(folderControls, { collapsed: true })
         }, { collapsed: true })
       })
