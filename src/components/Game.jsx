@@ -12,8 +12,9 @@ import PostProcess from "./PostProcess"
 
 // Preset models
 //import { presetModels, presetEnviroments, hdrTexture } from "../assets/presets"
-//import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/sgrs/presets"
-import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/tj4/presets"
+import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/sgrs/presets"
+//import { presetModels, presetEnviroments, hdrTexture } from "../assets/dev/tj4/presets"
+import HUD from "./HUD"
 
 function Game() {
   const containerRef = useRef()
@@ -28,10 +29,11 @@ function Game() {
   const charIndex = useRef(0)
   const transformControlsRef = useRef()
   const [controlsHidden, setControlsHidden] = useState(true)
+  const [controlSize, setControlSize] = useState(1.5)
   const [images, setImages] = useState([])
 
   // Gizmo Controls
-  const { gizmoSize, controlSize, ctrlRootAlwaysOn, clogObj, clogMat, clogCol } = useControls('Controls', {
+  const { gizmoSize, controlSizeLeva, ctrlRootAlwaysOn, clogObj, clogMat, clogCol } = useControls('Controls', {
     "Cycle Gizmo": button(() => {
       cycleGizmo()
     }),
@@ -45,7 +47,7 @@ function Game() {
     "Hide Controls": button(() => {
       setControlsHidden(!controlsHidden)
     }),
-    controlSize: {
+    controlSizeLeva: {
       label: "Control Size",
       value: 1.5,
       min: 0.2,
@@ -54,7 +56,7 @@ function Game() {
     },
     ctrlRootAlwaysOn: {
       label: "Root Always Visible",
-      value: true
+      value: false
     },
     "Console Logs": folder({
       clogObj: {
@@ -235,16 +237,17 @@ function Game() {
     if (!transformControlsRef.current) return
     if (transformControlsRef.current.mode === "translate") {
       transformControlsRef.current.mode = "rotate"
-      //transformControlsRef.current.size = 0.3
     }
     else if (transformControlsRef.current.mode === "rotate") {
       transformControlsRef.current.mode = "scale"
-      //transformControlsRef.current.size = 0.5
     }
     else if (transformControlsRef.current.mode === "scale") {
       transformControlsRef.current.mode = "translate"
-      //transformControlsRef.current.size = 1.1
     }
+  }
+  const setGizmoMode = (mode) => {
+    if (!transformControlsRef.current) return
+    transformControlsRef.current.mode = mode
   }
 
   // Gizmo Size
@@ -252,6 +255,10 @@ function Game() {
     if (!transformControlsRef.current) return
     transformControlsRef.current.size = gizmoSize
   },[gizmoSize])
+  // Control Size
+  useEffect(()=>{
+    setControlSize(controlSizeLeva)
+  },[controlSizeLeva])
 
   // Click Events
   useEffect(()=>{
@@ -419,6 +426,14 @@ function Game() {
         <Screenshot />
 
       </Canvas>
+
+      <HUD 
+        setGizmoMode={setGizmoMode}
+        setControlsHidden={setControlsHidden}
+        controlSize={controlSize}
+        setControlSize={setControlSize}
+      />
+
     </div>
   )
 }

@@ -8,7 +8,6 @@ Drag and drop glb files to load character, they must be rigged with a blender ri
 Drag and drop img textures.
 
 To Do:
-Add HUD that only appears when moused over
 Add compatibility for advanced rigify rigs
 Add compatibility for daz rigs
 

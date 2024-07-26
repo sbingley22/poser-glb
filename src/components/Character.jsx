@@ -21,7 +21,6 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
     if (b) {
       fkControls.current.forEach(fk => {
         fk.visible = false
-        console.log(fk)
         if (ctrlRootAlwaysOn && fk.name.includes("Rig")) fk.visible = true
       })
     }
@@ -134,7 +133,13 @@ const Character = ({ id, url, index, preset, position, rotation, controlsHidden,
     // Create controls
     const createControlBox = (name, color = 0xff0000, scale = [0.1,0.1,0.1]) => {
       const geometry = new THREE.BoxGeometry(...scale)
-      const material = new THREE.MeshBasicMaterial({ color: color, wireframe: true, depthTest: false })
+      const material = new THREE.MeshBasicMaterial({ 
+        color: color, 
+        wireframe: true, 
+        depthTest: false ,
+        transparent: true,
+        opacity: 0.5
+      })
       const box = new THREE.Mesh(geometry, material)
       box.name = name
       return box
