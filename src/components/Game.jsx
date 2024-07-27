@@ -117,7 +117,9 @@ function Game() {
       label: "Add",
       value: '',
       options: Object.keys(presetModels),
-      onChange: handleCharacterChange
+      onChange: (value) => {
+        handleCharacterChange(value)
+      }
     }
   }, { collapsed: false })
 

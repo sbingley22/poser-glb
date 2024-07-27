@@ -365,14 +365,14 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
       })
     }
 
-    if (preset.charNode && preset.skinIndex) {
-      const charNode = nodes[preset.charNode]
-      if (charNode && charNode.type === "Group") {
-        charNode.children.forEach( ch => {
-          ch.material = charNode.children[preset.skinIndex].material
-        })
-      }
-    }
+    // if (preset.charNode && preset.skinIndex) {
+    //   const charNode = nodes[preset.charNode]
+    //   if (charNode && charNode.type === "Group") {
+    //     charNode.children.forEach( ch => {
+    //       ch.material = charNode.children[preset.skinIndex].material
+    //     })
+    //   }
+    // }
 
     setUpdateLeva(prev => !prev)
     
@@ -494,24 +494,12 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
 
       const char = getCharacter()
       if (char === "") return {}
-
-      // // Get relevant skin textures
-      // // Textures need to be include character name!!!!
-      // Object.keys(materials).forEach(matName => {
-      //   if (matName.includes(char) || matName.includes("Ana") || matName.includes("Adam")) {
-      //     const mat = materials[matName]
-      //     const mapName = mat.map.name.replace('BaseColor.1001', '').replace('Skin', '')
-      //     if (skinNames.includes(mapName)) return
-
-      //     skinMaterials.push(mat)
-      //     skinNames.push(mapName)
-      //   }        
-      // })
-      //debugger
+      
+      // Get skin textures
       const charNode = nodes[char]
       if (charNode.type === "Group") {
         charNode.children.forEach(child => {
-          child.material.map.name
+          if (skinNames.includes(child.material.map.name)) return
           skinMaterials.push(child.material)
           skinNames.push(child.material.map.name)
         })
@@ -519,6 +507,16 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
         charNode.material.map.name
         skinMaterials.push(charNode.material)
         skinNames.push(charNode.material.map.name)
+      }
+
+      // Apply preset skin if there is one
+      if (preset.charNode && preset.skinIndex) {
+        const charNode = nodes[preset.charNode]
+        if (charNode && charNode.type === "Group") {
+          charNode.children.forEach( ch => {
+            ch.material = charNode.children[preset.skinIndex].material
+          })
+        }
       }
 
       // Apply to this char model and determine if it is a Group or Skinned Mesh

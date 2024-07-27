@@ -95,6 +95,99 @@ const Items = ({ id, url, index, preset, name, canvasRef, transformControlsRef, 
     
   }, [nodes, preset])
 
+  // Mesh Visibility
+  useControls(
+    () => {
+      if (updateLeva === null) return {}
+      //debugger
+      const controls = {}
+      const folderControls = {}
+      //console.log("LEVA Mesh Visibility Ctrls ENTERED")
+
+      Object.keys(nodes).forEach(meshName => {
+        const node = nodes[meshName]
+        if (node.type !== "Mesh" && node.type !== "Group" && node.type !== "SkinnedMesh") return
+        //if (node.type !== "Group" && node.parent?.type === "Group") 
+        
+        folderControls[meshName] = {
+          label: `${meshName}`,
+          value: node.visible,
+          onChange: (value) => {
+            node.visible = value
+          }
+        }
+      })
+
+      controls["Props"] = folder({
+        [`${name}-${index}`]: folder({
+          'Visibility': folder(folderControls, { collapsed: true })
+        }, { collapsed: true })
+      })
+      return controls
+    },
+    [updateLeva]
+  )
+
+  // Morph Controls
+  useControls(
+    () => {
+      if (updateLeva === null) return {}
+      if (!preset.mainNode) return {}
+      
+      //debugger
+
+      const controls = {}
+      const folderControls = {}
+      //console.log("Leva Morph Controls entered")
+
+      // If character contains sub meshes apply morphs to those as well
+      const morphNode = nodes[preset.mainNode]
+      if (morphNode.type !== "Group") {
+        const morphs = morphNode.morphTargetDictionary
+        if (!morphs) return {}
+      
+        Object.keys(morphs).forEach(morphName => {
+          folderControls[morphName] = {
+            label: `${morphName}`,
+            value: morphNode.morphTargetInfluences[morphNode.morphTargetDictionary[morphName]],
+            min: 0,
+            max: 1,
+            onChange: (value) => {
+              morphNode.morphTargetInfluences[morphNode.morphTargetDictionary[morphName]] = value
+            }
+          }
+        })      
+      }
+      else {
+        const morphs = morphNode.children[0].morphTargetDictionary
+        if (!morphs) return {}
+
+        Object.keys(morphs).forEach(morphName => {
+          folderControls[morphName] = {
+            label: `${morphName}`,
+            value: morphNode.children[0].morphTargetInfluences[morphNode.children[0].morphTargetDictionary[morphName]],
+            min: 0,
+            max: 1,
+            onChange: (value) => {
+              morphNode.children.forEach(child => {
+                child.morphTargetInfluences[child.morphTargetDictionary[morphName]] = value
+              })
+            }
+          }
+        })
+      }
+
+      controls["Props"] = folder({
+        [`${name}-${index}`]: folder({
+          'Morphs': folder(folderControls, { collapsed: true })
+        }, { collapsed: true })
+      })
+
+      return controls
+    },
+    [updateLeva]
+  )
+
   // Delete Item
   useControls("Props", {
     [`${name}-${index}`]: folder({
