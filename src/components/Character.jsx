@@ -495,25 +495,38 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
       const char = getCharacter()
       if (char === "") return {}
 
-      // Get relevant skin textures
-      // Textures need to be include character name!!!!
-      Object.keys(materials).forEach(matName => {
-        if (matName.includes(char) || matName.includes("Ana") || matName.includes("Adam")) {
-          const mat = materials[matName]
-          const mapName = mat.map.name.replace('BaseColor.1001', '').replace('Skin', '')
-          if (skinNames.includes(mapName)) return
+      // // Get relevant skin textures
+      // // Textures need to be include character name!!!!
+      // Object.keys(materials).forEach(matName => {
+      //   if (matName.includes(char) || matName.includes("Ana") || matName.includes("Adam")) {
+      //     const mat = materials[matName]
+      //     const mapName = mat.map.name.replace('BaseColor.1001', '').replace('Skin', '')
+      //     if (skinNames.includes(mapName)) return
 
-          skinMaterials.push(mat)
-          skinNames.push(mapName)
-        }        
-      })
+      //     skinMaterials.push(mat)
+      //     skinNames.push(mapName)
+      //   }        
+      // })
+      //debugger
+      const charNode = nodes[char]
+      if (charNode.type === "Group") {
+        charNode.children.forEach(child => {
+          child.material.map.name
+          skinMaterials.push(child.material)
+          skinNames.push(child.material.map.name)
+        })
+      } else {
+        charNode.material.map.name
+        skinMaterials.push(charNode.material)
+        skinNames.push(charNode.material.map.name)
+      }
 
       // Apply to this char model and determine if it is a Group or Skinned Mesh
       const val = nodes[char].type === "Group"
       ? 
-      nodes[char].children[0].material.map.name.replace('BaseColor.1001', '').replace('Skin', '')
+      nodes[char].children[0].material.map.name
       :
-      nodes[char].material.map.name.replace('BaseColor.1001', '').replace('Skin', '')
+      nodes[char].material.map.name
 
       folderControls["Texture"] = {
         label: `Texture`,

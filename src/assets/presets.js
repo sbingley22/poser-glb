@@ -1,5 +1,6 @@
-import glbFarmer from "./farmer.glb?url"
 import glbCyber from "./EdgeRunners.glb?url"
+import glbPunks from "./Punks.glb?url"
+import glbFarmer from "./farmer.glb?url"
 import glbProps from "./cyberpunkProps.glb?url"
 import hdr from "./hotelcell.hdr?url"
 
@@ -85,6 +86,14 @@ export const presetModels = {
         "vFem", "vFemBoots", "vFemHair", "vFemJacket", "vFemPistol", "vFemShotgun",
       ],
       charNode: "kiwi",
+      skinIndex: 0,
+    }
+  },
+  PunkA: {
+    url: glbPunks,
+    preset: {
+      hidden: [],
+      charNode: "Punk1",
       skinIndex: 0,
     }
   },
