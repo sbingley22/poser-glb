@@ -2,6 +2,7 @@
 import { Environment, OrbitControls, TransformControls } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import { Suspense, useEffect, useRef, useState } from "react"
+import * as THREE from 'three'
 import Character from "./Character"
 import { button, folder, useControls } from "leva"
 import Screenshot from "./Screenshot"
@@ -17,6 +18,24 @@ import { presetModels, presetProps, presetEnviroments, hdrTexture } from "../ass
 import HUD from "./HUD"
 import Items from "./Items"
 
+const mouseControls = [
+  {
+    LEFT: THREE.MOUSE.ROTATE,
+    MIDDLE: THREE.MOUSE.DOLLY,
+    RIGHT: THREE.MOUSE.PAN
+  },
+  {
+    LEFT: THREE.MOUSE.PAN,
+    MIDDLE: THREE.MOUSE.DOLLY,
+    RIGHT: THREE.MOUSE.ROTATE
+  },
+  {
+    LEFT: THREE.MOUSE.DOLLY,
+    MIDDLE: THREE.MOUSE.ROTATE,
+    RIGHT: THREE.MOUSE.PAN
+  },
+]
+
 function Game() {
   const containerRef = useRef()
   const canvasRef = useRef()
@@ -28,6 +47,7 @@ function Game() {
   const [controlsHidden, setControlsHidden] = useState(false)
   const [controlSize, setControlSize] = useState(1.5)
   const [images, setImages] = useState([])
+  const [mouseControlsIndex, setMouseControlsIndex] = useState(0)
 
   // Gizmo Controls
   const { gizmoSize, controlSizeLeva, ctrlRootAlwaysOn, hideCtrlOnDblClick, clogObj, clogMat, clogCol } = useControls('Controls', {
@@ -318,6 +338,7 @@ function Game() {
     const onPointerDown = (event) => {
       //console.log(event)
       event.preventDefault()
+      //event.stopPropagation()
 
       if (event.button >= 3) {
         cycleGizmo()
@@ -326,26 +347,46 @@ function Game() {
 
     const onDoubleClick = (event) => {
       event.preventDefault()
-      event.stopPropagation()
-      event.returnValue = false
+      //event.stopPropagation()
+      //event.returnValue = false
+      setDetatchControls()
+    }
 
-      transformControlsRef.current.detach()
-      if (hideCtrlOnDblClick) {
-        setControlsHidden(prev => !prev)
+    const handleTouchMove = (e) => {
+      e.preventDefault()
+    }
+
+    const handleMouseButton = (e) => {
+      if (e.button === 3 || e.button === 4) {
+        //console.log(e.button)
+        e.preventDefault()
       }
     }
 
     const canvas = canvasRef.current
     canvas.addEventListener("pointerdown", onPointerDown)
     canvas.addEventListener("dblclick", onDoubleClick)
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false })
+    window.addEventListener('pointerdown', handleMouseButton, { capture: true })
+    window.addEventListener('pointerup', handleMouseButton, { capture: true })
 
     return () => {
       canvas.removeEventListener("pointerdown", onPointerDown)
       canvas.removeEventListener("dblclick", onDoubleClick)
+      canvas.removeEventListener('touchmove', handleTouchMove)
+      window.removeEventListener('pointerdown', handleMouseButton, { capture: true })
+      window.removeEventListener('pointerup', handleMouseButton, { capture: true })
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const setDetatchControls = () => {
+    transformControlsRef.current.detach()
+    if (hideCtrlOnDblClick) {
+      setControlsHidden(prev => !prev)
+    }
+  }
 
   // Drag N Drop
   const handleDrop = (event) => {
@@ -432,6 +473,8 @@ function Game() {
             position={[0,2,2]}
             zoomSpeed={2}
             makeDefault
+            enableKeys={true}
+            mouseButtons={mouseControls[mouseControlsIndex]}
           />
 
           <TransformControls 
@@ -524,6 +567,8 @@ function Game() {
         setControlsHidden={setControlsHidden}
         controlSize={controlSize}
         setControlSize={setControlSize}
+        setMouseControlsIndex={setMouseControlsIndex}
+        setDetatchControls={setDetatchControls}
       />
 
     </div>

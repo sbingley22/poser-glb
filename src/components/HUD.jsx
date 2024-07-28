@@ -1,11 +1,11 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
 
-const HUD = ({ setGizmoMode, setControlsHidden, controlSize, setControlSize }) => {
+const HUD = ({ setGizmoMode, setControlsHidden, controlSize, setControlSize, setMouseControlsIndex, setDetatchControls }) => {
   const [visible, setVisible] = useState(true)
   const [locked, setLocked] = useState(true)
   const [dockedLeft, setDockedLeft] = useState(false)
-  const [gizmoSize, setGizmoSize] = useState(0.5)
+  //const [gizmoSize, setGizmoSize] = useState(0.5)
 
   const updateLocked = () => {
     setLocked(prev => !prev)
@@ -43,12 +43,12 @@ const HUD = ({ setGizmoMode, setControlsHidden, controlSize, setControlSize }) =
     setDockedLeft(!dockedLeft)
   }
 
-  const handleSliderChange = (event) => {
-    const value = parseFloat(event.target.value);
-    if (!isNaN(value)) {
-      setGizmoSize(value)
-    }
-  }
+  // const handleGizmoSliderChange = (event) => {
+  //   const value = parseFloat(event.target.value);
+  //   if (!isNaN(value)) {
+  //     setGizmoSize(value)
+  //   }
+  // }
 
   const handleControlSliderChange = (event) => {
     const value = parseFloat(event.target.value)
@@ -57,16 +57,16 @@ const HUD = ({ setGizmoMode, setControlsHidden, controlSize, setControlSize }) =
     }
   }
 
-  const buttonClass = "p-2 m-1 bg-green-700 hover:bg-green-800 border-solid border-black border-2"
+  const buttonClass = "p-2 m-0 bg-green-700 hover:bg-green-800 border-solid border-black border-2"
 
   return (
     <div
       id="bottom-bar"
       className={`fixed ${
         dockedLeft ? 'left-0 top-0 h-full w-26' : 'bottom-0 left-0 w-full h-12'
-      } bg-green-600 text-white text-center p-2 transition-transform duration-300 z-50 ${
+      } bg-green-600 text-white text-center transition-transform duration-300 z-50 ${
         visible ? 'translate-x-0 translate-y-0' : dockedLeft ? '-translate-x-full' : 'translate-y-full'
-      } flex items-center justify-center ${dockedLeft ? 'flex-col' : 'flex-row'}`}
+      } flex items-center justify-center flex-wrap m-0 p-0 ${dockedLeft ? 'flex-col' : 'flex-row'}`}
     >
       <button 
         onClick={toggleDockingPosition}
@@ -75,10 +75,10 @@ const HUD = ({ setGizmoMode, setControlsHidden, controlSize, setControlSize }) =
 
       <button 
         onClick={updateLocked}
-        className={buttonClass + ` ${dockedLeft ? "mb-4" : "mr-4"}`}
+        className={buttonClass + ` ${dockedLeft ? "mb-8" : "mr-6"}`}
       >{locked ? "Unlock" : "Lock"}</button>
 
-      <div className={`flex items-center ml-2 ${dockedLeft ? 'flex-col mb-4' : 'flex-row mr-4'} border-solid border-black border-2 p-2`}>
+      {/* <div className={`flex items-center ml-2 ${dockedLeft ? 'flex-col mb-4' : 'flex-row mr-4'} border-solid border-black border-2 p-2`}>
         <label htmlFor="gizmo-slider" className="mr-2">Gizmo: {gizmoSize.toFixed(1)}</label>
         <input
           type="range"
@@ -87,10 +87,15 @@ const HUD = ({ setGizmoMode, setControlsHidden, controlSize, setControlSize }) =
           max="1"
           step="0.1"
           value={gizmoSize}
-          onChange={handleSliderChange}
-          className="w-20"
+          onChange={handleGizmoSliderChange}
+          className="w-10"
         />
-      </div>
+      </div> */}
+
+      <button 
+        onClick={()=>setDetatchControls()}
+        className={buttonClass + ` ${dockedLeft ? "mb-4" : "mr-4"}`}
+      >Hide</button>
       
       <button 
         onClick={()=>setGizmoMode("translate")}
@@ -104,6 +109,19 @@ const HUD = ({ setGizmoMode, setControlsHidden, controlSize, setControlSize }) =
         onClick={()=>setGizmoMode("scale")}
         className={buttonClass + ` ${dockedLeft ? "mb-4" : "mr-4"}`}
       >Scale</button>
+      
+      <button 
+        onClick={()=>setMouseControlsIndex(0)}
+        className={buttonClass}
+      >Orbit</button>
+      <button 
+        onClick={()=>setMouseControlsIndex(1)}
+        className={buttonClass}
+      >Pan</button>
+      <button 
+        onClick={()=>setMouseControlsIndex(2)}
+        className={buttonClass + ` ${dockedLeft ? "mb-4" : "mr-4"}`}
+      >Zoom</button>
       
       <button 
         onClick={()=>setControlsHidden(prev => !prev)}

@@ -112,18 +112,21 @@ export const presetProps = {
     url: glbProps,
     preset: {
       hidden: ["dumpster", "motorcycle"],
+      mainNode: "car",
     }
   },
   Motorcycle: {
     url: glbProps,
     preset: {
       hidden: ["car", "dumpster"],
+      mainNode: "motorcycle",
     }
   },
   Dumpster: {
     url: glbProps,
     preset: {
       hidden: ["car", "motorcycle"],
+      mainNode: "dumpster",
     }
   },
 }
