@@ -12,7 +12,7 @@ import ShadowCatcher from "./ShadowCatcher"
 import PostProcess from "./PostProcess"
 
 // Preset models
-import { presetModels, presetProps, presetEnviroments, hdrTexture } from "../assets/presets"
+import { presetModels, presetProps, presetEnviroments, hdrTexture, presetImgs } from "../assets/presets"
 //import { presetModels, presetProps, presetEnviroments, hdrTexture } from "../assets/dev/sgrs/presets"
 //import { presetModels, presetProps, presetEnviroments, hdrTexture } from "../assets/dev/tj4/presets"
 import HUD from "./HUD"
@@ -191,25 +191,55 @@ function Game() {
   }, { collapsed: false })
 
   // Image Controls
+  const handleImgChange = (img) => {
+    if (!presetImgs) return
+    if (img === '') return
+    if (!presetImgs[img]) return
+    
+    let url  = presetImgs[img]
+
+    addImg(url)
+  }
+  const addImg = (url ) => {
+    const img = new Image()
+    img.src = url
+    img.onload = () => {
+      const { width, height } = img
+      setImages((prevImages) => [
+        ...prevImages,
+        { url, position: [0, 0, 0], width: width / 100, height: height / 100 }
+      ])
+    }
+  }
+  useControls('Images', {
+    imgDropdown: {
+      label: "Add",
+      value: "",
+      options: Object.keys(presetImgs),
+      onChange: handleImgChange
+    }
+  }, { collapsed: true })
   const { imgLock, imgsVisible, imgBrightness } = useControls('Images', {
-    imgLock: {
-      label: "Lock Selection",
-      value: false
-    },
-    imgsVisible: {
-      label: "Show Imgs",
-      value: true
-    },
-    imgBrightness: {
-      label: "Brightness",
-      value: 1,
-      min: 0,
-      max: 2,
-      step: 0.1
-    },
     "Delete Selected": button(() => {
       deleteImage()
     }),
+    "Misc": folder({      
+      imgLock: {
+        label: "Lock Selection",
+        value: false
+      },
+      imgsVisible: {
+        label: "Show Imgs",
+        value: true
+      },
+      imgBrightness: {
+        label: "Brightness",
+        value: 1,
+        min: 0,
+        max: 2,
+        step: 0.1
+      },
+    }, { collapsed: true }),
   }, { collapsed: true }, [images])
   const deleteImage = () => {
     if (!transformControlsRef.current?.object) return

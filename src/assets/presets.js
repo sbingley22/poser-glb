@@ -3,6 +3,9 @@ import glbPunks from "./Punks.glb?url"
 import glbFarmer from "./farmer.glb?url"
 import glbProps from "./cyberpunkProps.glb?url"
 import hdr from "./hotelcell.hdr?url"
+import bgAfterlife from "./bgafterlife1.jpg"
+import bgCyberpunkCity from "./bgcyberpunkcity.jpg"
+import imgAdamSmasher from "./imgAdamSmasher.png"
 
 export const presetModels = {
   V: {
@@ -136,3 +139,9 @@ export const presetEnviroments = {
 }
 
 export const hdrTexture = hdr
+
+export const presetImgs = {
+  "BG-Afterlife": bgAfterlife,
+  "BG-CyberPunk-City": bgCyberpunkCity,
+  "Adam-Smasher": imgAdamSmasher,
+}

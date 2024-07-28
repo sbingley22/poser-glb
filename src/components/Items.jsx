@@ -181,7 +181,7 @@ const Items = ({ id, url, index, preset, name, canvasRef, transformControlsRef, 
         [`${name}-${index}`]: folder({
           'Morphs': folder(folderControls, { collapsed: true })
         }, { collapsed: true })
-      })
+      }, { collapsed: true })
 
       return controls
     },
