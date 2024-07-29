@@ -1,12 +1,12 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/no-unknown-property */
 import { useEffect, useRef, useState } from "react"
-import { useThree } from "@react-three/fiber"
 import * as THREE from 'three'
+import { useThree } from "@react-three/fiber"
 import { useSkinnedMeshClone } from "./SkinnedMeshClone"
 import { button, folder, useControls } from "leva"
 
-const Character = ({ id, url, index, name, preset, position, rotation, canvasRef, controlsHidden, hideCtrlOnDblClick, transformControlsRef, controlSize, ctrlRootAlwaysOn, clogObj, clogMat, clogCol, deleteCharacter, bonesChest=true, bonesShoulder=true }) => {
+const Character = ({ id, url, index, name, preset, position, rotation, canvasRef, controlsHidden, hideCtrlOnDblClick, transformControlsRef, controlSize, ctrlRootAlwaysOn, clogObj, clogMat, clogCol, deleteCharacter, presetPoses={pose:"log"}, bonesChest=true, bonesShoulder=true }) => {
   const { camera } = useThree()
   const raycaster = useRef(new THREE.Raycaster())
   const mouse = useRef(new THREE.Vector2())
@@ -365,15 +365,6 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
       })
     }
 
-    // if (preset.charNode && preset.skinIndex) {
-    //   const charNode = nodes[preset.charNode]
-    //   if (charNode && charNode.type === "Group") {
-    //     charNode.children.forEach( ch => {
-    //       ch.material = charNode.children[preset.skinIndex].material
-    //     })
-    //   }
-    // }
-
     setUpdateLeva(prev => !prev)
     
   }, [nodes, preset, materials])
@@ -557,6 +548,40 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
     },
     [updateLeva]
   )
+
+  // Poses
+  const handlePoseChange = (pose) => {
+    if (pose === "") return
+
+    if (presetPoses[pose] == "log") {
+      const bones = []
+      fkControls.current.forEach(ctrl => {
+        const bone = ctrl.userData.control
+        bones.push({name: bone.name, rotation: bone.rotation})
+      })
+      console.log({"LogPose": bones})
+      return
+    }
+
+    // Apply Pose
+    presetPoses[pose].forEach(p => {
+      const node = nodes[p.name]
+      if (!node) return
+      
+      node.rotation.setFromVector3(new THREE.Vector3(p.rotation._x, p.rotation._y, p.rotation._z))
+    })
+    
+  }
+  useControls(`Characters`, {
+    [`${name}-${index}`]: folder({
+      Poses: {
+        label: "Poses",
+        value: '',
+        options: Object.keys(presetPoses),
+        onChange: handlePoseChange
+      }
+    })
+  }, { collapsed: false })
 
   return (
     <group>

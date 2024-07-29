@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable react/no-unknown-property */
 import { Environment, OrbitControls, TransformControls } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
@@ -10,13 +11,9 @@ import { v4 as uuidv4 } from 'uuid'
 import ImgPlane from "./ImgPlane"
 import ShadowCatcher from "./ShadowCatcher"
 import PostProcess from "./PostProcess"
-
-// Preset models
-import { presetModels, presetProps, presetEnviroments, hdrTexture, presetImgs } from "../assets/presets"
-//import { presetModels, presetProps, presetEnviroments, hdrTexture } from "../assets/dev/sgrs/presets"
-//import { presetModels, presetProps, presetEnviroments, hdrTexture } from "../assets/dev/tj4/presets"
 import HUD from "./HUD"
 import Items from "./Items"
+
 
 const mouseControls = [
   {
@@ -36,7 +33,7 @@ const mouseControls = [
   },
 ]
 
-function Game() {
+function Game({ presets, presetSelected }) {
   const containerRef = useRef()
   const canvasRef = useRef()
   const [characters, setCharacters] = useState([])
@@ -102,9 +99,9 @@ function Game() {
     let url, preset = null
     let name = "C"
 
-    Object.keys(presetModels).forEach(presetName => {
+    Object.keys(presets[presetSelected].presetModels).forEach(presetName => {
       if (char !== presetName) return
-      const currentModel = presetModels[presetName]
+      const currentModel = presets[presetSelected].presetModels[presetName]
       url = currentModel.url
       preset = currentModel.preset
       name = presetName
@@ -136,11 +133,11 @@ function Game() {
     character: {
       label: "Add",
       value: '',
-      options: Object.keys(presetModels),
+      options: Object.keys(presets[presetSelected].presetModels),
       onChange: (value) => {
         handleCharacterChange(value)
       }
-    }
+    },
   }, { collapsed: false })
 
   // Adding Preset Prop
@@ -151,9 +148,9 @@ function Game() {
     let url, preset = null
     let name = "C"
 
-    Object.keys(presetProps).forEach(presetName => {
+    Object.keys(presets[presetSelected].presetProps).forEach(presetName => {
       if (prop !== presetName) return
-      const currentProp = presetProps[presetName]
+      const currentProp = presets[presetSelected].presetProps[presetName]
       url = currentProp.url
       preset = currentProp.preset
       name = presetName
@@ -185,18 +182,18 @@ function Game() {
     prop: {
       label: "Add",
       value: '',
-      options: Object.keys(presetProps),
+      options: Object.keys(presets[presetSelected].presetProps),
       onChange: handlePropChange
     }
   }, { collapsed: false })
 
   // Image Controls
   const handleImgChange = (img) => {
-    if (!presetImgs) return
+    if (!presets[presetSelected].presetImgs) return
     if (img === '') return
-    if (!presetImgs[img]) return
+    if (!presets[presetSelected].presetImgs[img]) return
     
-    let url  = presetImgs[img]
+    let url  = presets[presetSelected].presetImgs[img]
 
     addImg(url)
   }
@@ -215,7 +212,7 @@ function Game() {
     imgDropdown: {
       label: "Add",
       value: "",
-      options: Object.keys(presetImgs),
+      options: Object.keys(presets[presetSelected].presetImgs),
       onChange: handleImgChange
     }
   }, { collapsed: true })
@@ -329,7 +326,7 @@ function Game() {
     },
     environmentPreset: {
       label: "Environment",
-      value: presetEnviroments?.environment? presetEnviroments.environment : 'forest',
+      value: presets[presetSelected].presetEnviroments?.environment? presets[presetSelected].presetEnviroments.environment : 'forest',
       options: environmentStrings,
     }
   }, { collapsed: true })
@@ -457,7 +454,7 @@ function Game() {
   // Add initial character
   useEffect(()=>{
     if (charIndex.current === 0) {
-      const presetNames = Object.keys(presetModels)
+      const presetNames = Object.keys(presets[presetSelected].presetModels)
       if (presetNames.length === 0) return
 
       handleCharacterChange(presetNames[0])
@@ -495,7 +492,7 @@ function Game() {
               radius: 60, // Radius of the world. (Default 60)
               scale: environmentScale, // (Default: 1000)
             } : false}
-            files={hdrTexture}
+            files={presets[presetSelected].hdrTexture}
           />
 
           <OrbitControls
@@ -544,6 +541,7 @@ function Game() {
               clogMat={clogMat}
               clogCol={clogCol}
               deleteCharacter={deleteCharacter}
+              presetPoses={presets[presetSelected].presetPoses ? presets[presetSelected].presetPoses : {pose:"log"}}
             />
           ))}
 
