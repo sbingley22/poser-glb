@@ -178,14 +178,18 @@ function Game({ presets, presetSelected }) {
     setItems(prevProps => prevProps.filter(prop => prop.id !== id))
   }
   // Prop Controls
-  useControls(`Props`, {
+  const { dndIsProp } = useControls(`Props`, {
     prop: {
       label: "Add",
       value: '',
       options: Object.keys(presets[presetSelected].presetProps),
       onChange: handlePropChange
+    },
+    dndIsProp: {
+      label: "DragNDrop is Prop?",
+      value: false
     }
-  }, { collapsed: false })
+  }, { collapsed: true })
 
   // Image Controls
   const handleImgChange = (img) => {
@@ -433,17 +437,34 @@ function Game({ presets, presetSelected }) {
           ])
         }
       } else if (file && file.type === 'model/gltf-binary') {
-        const url = URL.createObjectURL(file);
-        setCharacters((prev) => [
-          ...prev,
-          {
-            url: url,
-            id: uuidv4(),
-            preset: null,
-            index: charIndex.current
-          }
-        ])
-        charIndex.current += 1
+        const url = URL.createObjectURL(file)
+        if (dndIsProp) {
+          propIndex.current += 1
+          setItems(prevProps => {
+            const temp = [...prevProps]
+            temp.push({
+              url: url,
+              id: uuidv4(),
+              preset: null,
+              index: propIndex.current,
+              name: "Prop"
+            })
+            return temp
+          })
+        }
+        else {
+          charIndex.current += 1
+          setCharacters((prev) => [
+            ...prev,
+            {
+              url: url,
+              id: uuidv4(),
+              preset: null,
+              index: charIndex.current,
+              name: "Char"
+            }
+          ])
+        }
       }
     })
   }
