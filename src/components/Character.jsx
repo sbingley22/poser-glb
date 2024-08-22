@@ -6,7 +6,7 @@ import { useThree } from "@react-three/fiber"
 import { useSkinnedMeshClone } from "./SkinnedMeshClone"
 import { button, folder, useControls } from "leva"
 
-const Character = ({ id, url, index, name, preset, position, rotation, canvasRef, controlsHidden, hideCtrlOnDblClick, transformControlsRef, controlSize, ctrlRootAlwaysOn, clogObj, clogMat, clogCol, deleteCharacter, presetPoses={pose:"log"}, bonesChest=true, bonesShoulder=true }) => {
+const Character = ({ id, url, index, name, preset, position, rotation, canvasRef, controlsHidden, hideCtrlOnDblClick, transformControlsRef, controlSize, ctrlRootAlwaysOn, clogObj, clogMat, clogCol, deleteCharacter, presetPoses={pose:"log"}, loadPose=null, bonesChest=true, bonesShoulder=true }) => {
   //console.log("Character render")
   const { camera } = useThree()
   const raycaster = useRef(new THREE.Raycaster())
@@ -286,6 +286,19 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes, position, scene])
 
+  // Load Pose
+  useEffect(()=>{
+    if (!loadPose) return
+
+    
+    loadPose.forEach(p => {
+      const node = nodes[p.name]
+      if (!node) return
+      
+      node.rotation.setFromVector3(new THREE.Vector3(p.rotation._x, p.rotation._y, p.rotation._z))
+    })
+  },[loadPose])
+
   // Raycasting
   useEffect(()=>{
     const onPointerDown = (event) => {
@@ -304,7 +317,7 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
         mouse.current.y = -(event.clientY / event.srcElement.height) * 2 + 1
         raycaster.current.setFromCamera(mouse.current, camera)
 
-        console.log(event.srcElement, mouse.current.x, mouse.current.y)
+        //console.log(event.srcElement, mouse.current.x, mouse.current.y)
 
         const intersects = raycaster.current.intersectObjects(scene.children, true)
         for (let i=0; i < intersects.length; i++) {
@@ -620,7 +633,7 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
   }, { collapsed: false })
 
   return (
-    <group>
+    <group name="CharGroup" customId={id} >
       <primitive object={scene} dispose={null} />
     </group>
   )

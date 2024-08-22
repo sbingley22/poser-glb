@@ -8,8 +8,6 @@ Drag and drop glb files to load character, they must be rigged with a blender ri
 Drag and drop img textures.
 
 To Do:
-Add VR support
-Add controller support
-Add Canvas resizer for screen shots
+Add save system
 
 git subtree push --prefix dist origin gh-pages

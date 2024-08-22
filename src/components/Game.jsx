@@ -13,6 +13,7 @@ import ShadowCatcher from "./ShadowCatcher"
 import PostProcess from "./PostProcess"
 import HUD from "./HUD"
 import Items from "./Items"
+import SaveState from "./SaveState"
 
 
 const mouseControls = [
@@ -33,7 +34,7 @@ const mouseControls = [
   },
 ]
 
-function Game({ presets, presetSelected }) {
+function Game({ presets, presetSelected, loadData }) {
   const containerRef = useRef()
   const canvasRef = useRef()
   const [characters, setCharacters] = useState([])
@@ -45,6 +46,15 @@ function Game({ presets, presetSelected }) {
   const [controlSize, setControlSize] = useState(1.5)
   const [images, setImages] = useState([])
   const [mouseControlsIndex, setMouseControlsIndex] = useState(0)
+
+  // Load Data
+  useEffect(()=>{
+    if (!loadData) return
+
+    setCharacters(loadData.characters)
+    charIndex.current = loadData.charIndex
+
+  },[loadData])
 
   // Gizmo Controls
   const { screenWidth, gizmoSize, controlSizeLeva, ctrlRootAlwaysOn, hideCtrlOnDblClick, clogObj, clogMat, clogCol } = useControls('Controls', {
@@ -572,6 +582,7 @@ function Game({ presets, presetSelected }) {
               clogCol={clogCol}
               deleteCharacter={deleteCharacter}
               presetPoses={presets[presetSelected].presetPoses ? presets[presetSelected].presetPoses : {pose:"log"}}
+	      loadPose={loadData? loadData.poses[index] : null}
             />
           ))}
 
@@ -617,6 +628,8 @@ function Game({ presets, presetSelected }) {
         <PostProcess />
 
         <Screenshot />
+
+        <SaveState presetSelected={presetSelected} characters={characters} charIndex={charIndex} />
 
       </Canvas>
 

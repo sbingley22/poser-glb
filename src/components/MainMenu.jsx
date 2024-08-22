@@ -4,11 +4,24 @@ import InfoScreen from "./InfoScreen"
 
 const buttonClass = "m-2 p-2 bg-slate-300 hover:bg-slate-400 rounded-xl text-2xl border-solid border-2 border-blue-800"
 
-const MainMenu = ({ presetNames, setPresetSelected }) => {
+const MainMenu = ({ presetNames, setPresetSelected, setLoadData }) => {
   const [showInfo, setShowInfo] = useState(false)
   
   const formatName = (name) => {
     return name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([a-zA-Z])([0-9])/g, '$1 $2');
+  }
+
+  const loadData = () => {
+    const rawData = localStorage.getItem('autosave')
+    if (!rawData) {
+      console.log("No save data")
+      return
+    }
+
+    const data = JSON.parse(rawData)
+    console.log(data)
+    setLoadData(data)
+    setPresetSelected(data.presetSelected)
   }
 
   if (showInfo) return <InfoScreen buttonClass={buttonClass} setShowInfo={setShowInfo} />
@@ -20,9 +33,15 @@ const MainMenu = ({ presetNames, setPresetSelected }) => {
 		GLB Poser
 	      </h1>
 
-	      <button className={buttonClass} onClick={()=>setShowInfo(true)}>
-		How To Use
-	      </button>
+	      <div>
+		      <button className={buttonClass} onClick={()=>setShowInfo(true)}>
+			How To Use
+		      </button>
+
+		      <button className={buttonClass} onClick={()=>loadData()}>
+			Load Last
+		      </button>
+	      </div>
       </div>
 
       <div className="m-0 mt-8 p-4 md:p-12 rounded-md border-solid border-2 border-blue-800 bg-slate-500">
