@@ -8,10 +8,8 @@ Drag and drop glb files to load character, they must be rigged with a blender ri
 Drag and drop img textures.
 
 To Do:
-Characters with unknown rigs will have all bones added as controls
-Leva option to specify drag n drop gltf is prop or char
-Add controller support
 Add VR support
-Add poser leva tab that allows full arm / leg posing via 2d vector input
+Add controller support
+Add Canvas resizer for screen shots
 
 git subtree push --prefix dist origin gh-pages

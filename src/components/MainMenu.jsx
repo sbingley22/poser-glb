@@ -2,7 +2,7 @@
 import { useState } from "react"
 import InfoScreen from "./InfoScreen"
 
-const buttonClass = "m-2 p-4 bg-slate-100 hover:bg-slate-200 rounded-xl text-3xl border-solid border-2 border-blue-800"
+const buttonClass = "m-2 p-2 bg-slate-300 hover:bg-slate-400 rounded-xl text-2xl border-solid border-2 border-blue-800"
 
 const MainMenu = ({ presetNames, setPresetSelected }) => {
   const [showInfo, setShowInfo] = useState(false)
@@ -14,18 +14,20 @@ const MainMenu = ({ presetNames, setPresetSelected }) => {
   if (showInfo) return <InfoScreen buttonClass={buttonClass} setShowInfo={setShowInfo} />
 
   return (
-    <div className="flex flex-col h-screen items-center text-center bg-gradient-to-t from-slate-400 to-slate-200">
-      <h1 className="text-6xl font-mono font-bold m-6 p-4 mt-0 pt-4 bg-slate-50 w-screen border-b-4 border-slate-300">
-        GLB Poser
-      </h1>
+    <div className="flex flex-col h-screen box-border items-center text-center bg-gradient-to-t from-slate-400 to-slate-200">
+      <div className="m-0 p-4 pt-4 bg-slate-300 w-screen border-b-4 border-slate-300 flex justify-between items-center">
+	      <h1 className="text-4xl font-mono font-bold inline mb-0 pb-0">
+		GLB Poser
+	      </h1>
 
-      <button className={buttonClass} onClick={()=>setShowInfo(true)}>
-        How To Use
-      </button>
+	      <button className={buttonClass} onClick={()=>setShowInfo(true)}>
+		How To Use
+	      </button>
+      </div>
 
-      <div className="m-0 mt-8 p-6 md:p-20 rounded-md border-solid border-2 border-blue-800 bg-slate-500">
-        <h3 className="m-4 p-4 pt-0 text-4xl text-white">Select theme:</h3>
-        <div className="grid md:grid-rows-3 grid-flow-row gap-4">
+      <div className="m-0 mt-8 p-4 md:p-12 rounded-md border-solid border-2 border-blue-800 bg-slate-500">
+        <h3 className="m-1 p-1 pt-0 text-2xl text-white">Select theme:</h3>
+        <div className="grid md:grid-rows-3 grid-flow-row gap-2">
           {presetNames.map(name => (
             <button 
               key={name+"button"} 

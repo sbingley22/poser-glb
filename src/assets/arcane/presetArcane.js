@@ -21,14 +21,12 @@ export const presetModels = {
 export const presetProps = {}
 
 export const presetEnviroments = {
-  environment: "sunset"
+  environment: "sunset",
 }
 
 export const hdrTexture = null
 
 export const presetImgs = {
-  // "BG-PoliceStation": bgPoliceStation,
-  // "BG-Underground": bgUnderground,
 }
 
 export const presetPoses = poses

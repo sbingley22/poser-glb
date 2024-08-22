@@ -1,6 +1,5 @@
 import glbCyber from "./EdgeRunners.glb?url"
 import glbPunks from "./Punks.glb?url"
-import glbFarmer from "./farmer.glb?url"
 import glbProps from "./cyberpunkProps.glb?url"
 import hdr from "./hotelcell.hdr?url"
 import bgAfterlife from "./bgafterlife1.jpg"
@@ -99,14 +98,6 @@ export const presetModels = {
     preset: {
       hidden: [],
       charNode: "Punk1",
-      skinIndex: 0,
-    }
-  },
-  Farmer: {
-    url: glbFarmer,
-    preset: {
-      hidden: ["ana_2", "PlateForearms", "PlateShoulder"],
-      charNode: "Ana",
       skinIndex: 0,
     }
   },

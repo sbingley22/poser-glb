@@ -9,7 +9,6 @@ function App() {
   const [presetSelected, setPresetSelected] = useState("")
 
   if (presetSelected === "") {
-    //setPresetSelected("cyberpunk")
     return <MainMenu presetNames={Object.keys(presets)} setPresetSelected={setPresetSelected} />
   }
 

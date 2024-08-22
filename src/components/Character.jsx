@@ -7,6 +7,7 @@ import { useSkinnedMeshClone } from "./SkinnedMeshClone"
 import { button, folder, useControls } from "leva"
 
 const Character = ({ id, url, index, name, preset, position, rotation, canvasRef, controlsHidden, hideCtrlOnDblClick, transformControlsRef, controlSize, ctrlRootAlwaysOn, clogObj, clogMat, clogCol, deleteCharacter, presetPoses={pose:"log"}, bonesChest=true, bonesShoulder=true }) => {
+  //console.log("Character render")
   const { camera } = useThree()
   const raycaster = useRef(new THREE.Raycaster())
   const mouse = useRef(new THREE.Vector2())
@@ -14,17 +15,20 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
   const fkControls = useRef([])
   const lmbHoldTime = useRef(null)
   const [updateLeva, setUpdateLeva] = useState(null)
+  const skinSlot = useRef(-1)
 
   // Show / Hide Controls
   const hideControls = (hide) => {
     if (hide) {
       fkControls.current.forEach(fk => {
+	if (!fk) return
         fk.visible = false
         if (ctrlRootAlwaysOn && fk.name.includes("Rig")) fk.visible = true
       })
     }
     else {
       fkControls.current.forEach(fk => {
+	if (!fk) return
         fk.visible = true
       })
     }
@@ -55,15 +59,49 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
   },[controlSize])
 
   // Setup FK Controls
+  const createControlBox = (name, color = 0x00ff00, scale = [0.1,0.1,0.1]) => {
+    const geometry = new THREE.BoxGeometry(...scale)
+    const material = new THREE.MeshBasicMaterial({ 
+      color: color, 
+      wireframe: true, 
+      depthTest: false ,
+      transparent: true,
+      opacity: 0.2
+    })
+    const box = new THREE.Mesh(geometry, material)
+    box.name = name
+    return box
+  }
+  const setupUnkownRig = () => {
+    const controlBoxes = []
+    Object.keys(nodes).forEach(nodeName => {
+      const node = nodes[nodeName]
+      if (node.type !== "Bone") return
+      const ctrlBox = createControlBox(`Control-FK-${node.name}`)
+      controlBoxes.push(ctrlBox)
+      node.add(ctrlBox)
+      ctrlBox.userData = { control: node }
+      fkControls.current.push(ctrlBox)
+
+      fkControls.current.forEach( fk => {
+        fk.scale.setScalar(controlSize)
+      })  
+      hideControls(controlsHidden)
+    })
+    
+  }
   useEffect(()=>{
     if (fkControls.current.length > 0) return
-    console.log(nodes, materials)
+    console.log(nodes)
 
     let rigType = null
     if (nodes["DEF-spine001"] && nodes["DEF-f_index01L"]) rigType = "rigify"
     else if (nodes["DEF-spine001"] && nodes["DEF-forearmR"]) rigType = "rigifyBasic"
-    else console.log("Rig Unknown!")
-    //console.log(rigType)
+    else {
+      console.log("Rig Unknown!")
+      setupUnkownRig()
+      return
+    }
 
     // Reparent
     nodes["DEF-upper_armL"].removeFromParent()
@@ -127,21 +165,6 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
 
         //console.log(nodeName)
       })
-    }
-
-    // Create controls
-    const createControlBox = (name, color = 0x00ff00, scale = [0.1,0.1,0.1]) => {
-      const geometry = new THREE.BoxGeometry(...scale)
-      const material = new THREE.MeshBasicMaterial({ 
-        color: color, 
-        wireframe: true, 
-        depthTest: false ,
-        transparent: true,
-        opacity: 0.2
-      })
-      const box = new THREE.Mesh(geometry, material)
-      box.name = name
-      return box
     }
 
     const controlBoxRig = createControlBox("Control-FK-Rig", 0xff0000, [0.2,0.02,0.2])
@@ -277,9 +300,11 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
         const duration = Date.now() - lmbHoldTime.current
         if (duration > 450) return
 
-        mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1
-        mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1
+        mouse.current.x = (event.clientX / event.srcElement.width) * 2 - 1
+        mouse.current.y = -(event.clientY / event.srcElement.height) * 2 + 1
         raycaster.current.setFromCamera(mouse.current, camera)
+
+        console.log(event.srcElement, mouse.current.x, mouse.current.y)
 
         const intersects = raycaster.current.intersectObjects(scene.children, true)
         for (let i=0; i < intersects.length; i++) {
@@ -381,6 +406,7 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
 
       Object.keys(nodes).forEach(meshName => {
         const node = nodes[meshName]
+	if (!node) return
         if (node.type !== "Mesh" && node.type !== "Group" && node.type !== "SkinnedMesh") return
         if (node.type !== "Group" && node.parent?.type === "Group") {
           if (node.parent.name !== "Ana" && node.parent.name !== "AnaGen" && node.parent.name !== "Adam" && node.parent.name !== character) return
@@ -390,6 +416,7 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
           label: `${meshName}`,
           value: node.visible,
           onChange: (value) => {
+	    if (!node) return
             node.visible = value
           }
         }
@@ -397,7 +424,7 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
 
       controls["Characters"] = folder({
         [`${name}-${index}`]: folder({
-          'Visibility': folder(folderControls, { collapsed: true })
+          'Meshes': folder(folderControls, { collapsed: true })
         }, { collapsed: true })
       })
       return controls
@@ -477,6 +504,7 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
     () => {
       if (updateLeva === null) return {}
       //console.log("Leva Skin Ctrls Entered")
+      //debugger
 
       const controls = {}
       const folderControls = {}
@@ -495,9 +523,7 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
           skinNames.push(child.material.map.name)
         })
       } else {
-        charNode.material.map.name
-        skinMaterials.push(charNode.material)
-        skinNames.push(charNode.material.map.name)
+	return {}
       }
 
       // Apply preset skin if there is one
@@ -523,17 +549,27 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
         options: skinNames,
         onChange: (value) => {
           if (value === "") return
-          const index = skinNames.indexOf(value)
+          const i = skinNames.indexOf(value)
 
           if (nodes[char].type === "Group") {
-            nodes[char].children.forEach( ch => {
-              ch.material = skinMaterials[index]
+            nodes[char].children.forEach( (ch, index) => {
+	      if (skinSlot.current === -1 || skinSlot.current === index) ch.material = skinMaterials[i]
             })
           }
           else {
             nodes[char].material = skinMaterials[index]
           }
         }
+      }
+
+      folderControls["Slot"] = {
+        label: "Slot",
+	value: -1,
+	options: [-1,0,1,2,3,4],
+	onChange: (value) => {
+	  //setSkinSlot(value)
+	  skinSlot.current = value
+	}
       }
 
       controls["Characters"] = folder({

@@ -47,35 +47,43 @@ function Game({ presets, presetSelected }) {
   const [mouseControlsIndex, setMouseControlsIndex] = useState(0)
 
   // Gizmo Controls
-  const { gizmoSize, controlSizeLeva, ctrlRootAlwaysOn, hideCtrlOnDblClick, clogObj, clogMat, clogCol } = useControls('Controls', {
-    "Cycle Gizmo": button(() => {
-      cycleGizmo()
-    }),
-    gizmoSize: {
-      label: "Gizmo Size",
-      value: 0.4,
-      min: 0.1,
-      max: 2,
-      step: 0.1
+  const { screenWidth, gizmoSize, controlSizeLeva, ctrlRootAlwaysOn, hideCtrlOnDblClick, clogObj, clogMat, clogCol } = useControls('Controls', {
+    screenWidth: {
+	label: "ScreenWidth",
+	value: 100,
+	min: 10,
+	max: 100,
     },
-    "Hide Controls": button(() => {
-      setControlsHidden(!controlsHidden)
-    }),
-    controlSizeLeva: {
-      label: "Control Size",
-      value: 0.5,
-      min: 0.2,
-      max: 2,
-      step: 0.1
-    },
-    ctrlRootAlwaysOn: {
-      label: "Root Always Visible",
-      value: false
-    },
-    hideCtrlOnDblClick: {
-      label: "Double Click Hides Controls",
-      value: true
-    },
+    "Gizmo": folder({
+	    "Cycle Gizmo": button(() => {
+	      cycleGizmo()
+	    }),
+	    gizmoSize: {
+	      label: "Gizmo Size",
+	      value: 0.4,
+	      min: 0.1,
+	      max: 2,
+	      step: 0.1
+	    },
+	    "Hide Controls": button(() => {
+	      setControlsHidden(!controlsHidden)
+	    }),
+	    controlSizeLeva: {
+	      label: "Control Size",
+	      value: 0.5,
+	      min: 0.2,
+	      max: 2,
+	      step: 0.1
+	    },
+	    ctrlRootAlwaysOn: {
+	      label: "Root Always Visible",
+	      value: false
+	    },
+	    hideCtrlOnDblClick: {
+	      label: "Double Click Hides Controls",
+	      value: true
+	    },
+    }, { collapsed: true }),
     "Console Logs": folder({
       clogObj: {
         label: "Log Obj",
@@ -290,7 +298,7 @@ function Game({ presets, presetSelected }) {
   const { environmentShow, showShadowCatcher, environmentGround, environmentRotation, environmentScale, environmentBlur, lightIntensity, environmentPreset } = useControls('Environment', {
     environmentShow: {
       label: "Show",
-      value: true,
+      value: presets[presetSelected].presetEnviroments?.show ?? true,
     },
     showShadowCatcher: {
       label: "Shadow Catcher",
@@ -298,7 +306,7 @@ function Game({ presets, presetSelected }) {
     },
     environmentGround: {
       label: "Ground",
-      value: true,
+      value:  presets[presetSelected].presetEnviroments?.show ?? true,
     },
     environmentScale: {
       label: "Scale",
@@ -330,7 +338,7 @@ function Game({ presets, presetSelected }) {
     },
     environmentPreset: {
       label: "Environment",
-      value: presets[presetSelected].presetEnviroments?.environment? presets[presetSelected].presetEnviroments.environment : 'forest',
+      value: presets[presetSelected].presetEnviroments?.environment ?? 'forest',
       options: environmentStrings,
     }
   }, { collapsed: true })
@@ -487,6 +495,7 @@ function Game({ presets, presetSelected }) {
     <div 
       ref={containerRef} 
       className="w-screen h-screen bg-gradient-to-t from-slate-700 to-gray-600"
+      style={{ width: screenWidth + "%", margin: "0" }}
       onDrop={handleDrop} 
       onDragOver={handleDragOver} 
     >
