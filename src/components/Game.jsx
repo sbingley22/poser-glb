@@ -505,7 +505,7 @@ function Game({ presets, presetSelected, loadData }) {
     <div 
       ref={containerRef} 
       className="w-screen h-screen bg-gradient-to-t from-slate-700 to-gray-600"
-      style={{ width: screenWidth + "%", margin: "0" }}
+      style={{ width: screenWidth + "%", margin: "auto" }}
       onDrop={handleDrop} 
       onDragOver={handleDragOver} 
     >

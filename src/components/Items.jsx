@@ -83,12 +83,34 @@ const Items = ({ id, url, index, preset, name, canvasRef, transformControlsRef, 
     }
 
     if (preset.hidden) {
-      preset.hidden.forEach( v => {
-        if (nodes[v]) { 
-          nodes[v].visible = false
-          nodes[v].frustumCulled = false
-        }
-      })
+	  if (preset.hidden.length === 1 && preset.hidden[0] === "SHOW") {
+		// Hide all nodes except main node
+		Object.keys(nodes).forEach(meshName => {
+		  const node = nodes[meshName]
+		  if (node.type !== "Mesh" && node.type !== "Group" && node.type !== "SkinnedMesh") return
+		  node.visible = false
+		  node.frustumCulled = false
+		})
+		if (nodes.Scene) nodes.Scene.visible = true
+		if (nodes[preset.mainNode]) {
+			nodes[preset.mainNode].visible = true
+			if (nodes[preset.mainNode].type === "Group") {
+				nodes[preset.mainNode].children.forEach(child => child.visible = true)
+			}
+		}
+		else {
+			console.log("Cannot find: ", preset.mainNode, nodes)
+		}
+	  }
+	  else {
+		  // Only Hide specified hidden nodes
+		  preset.hidden.forEach( v => {
+			if (nodes[v]) { 
+			  nodes[v].visible = false
+			  nodes[v].frustumCulled = false
+			}
+		  })
+	  }
     }
 
     setUpdateLeva(prev => !prev)

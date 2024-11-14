@@ -313,9 +313,14 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
         const duration = Date.now() - lmbHoldTime.current
         if (duration > 450) return
 
-        mouse.current.x = (event.clientX / event.srcElement.width) * 2 - 1
-        mouse.current.y = -(event.clientY / event.srcElement.height) * 2 + 1
-        raycaster.current.setFromCamera(mouse.current, camera)
+        const rect = event.currentTarget.getBoundingClientRect();
+        mouse.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.current.setFromCamera(mouse.current, camera);
+
+        //mouse.current.x = (event.clientX / event.srcElement.width) * 2 - 1
+        //mouse.current.y = -(event.clientY / event.srcElement.height) * 2 + 1
+        //raycaster.current.setFromCamera(mouse.current, camera)
 
         //console.log(event.srcElement, mouse.current.x, mouse.current.y)
 
@@ -390,6 +395,7 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
       const node = nodes[meshName]
       if (node.type !== "Mesh" && node.type !== "Group" && node.type !== "SkinnedMesh") return
       node.castShadow = true
+      node.frustumCulled = false
     })
 
     if (!preset) {
@@ -400,6 +406,41 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
     if (preset.hidden) {
       preset.hidden.forEach( v => {
         if (nodes[v]) nodes[v].visible = false
+      })
+    }
+
+    if (preset.show) {
+      Object.keys(nodes).forEach(o => {
+        if (nodes[o].type !== "Mesh" && nodes[o].type !== "Group" && nodes[o].type !== "SkinnedMesh") return
+        nodes[o].visible = false
+      })
+      if (nodes["Scene"]) nodes["Scene"].visible = true
+
+      preset.show.forEach( v => {
+        if (nodes[v]) {
+          nodes[v].visible = true
+          if (nodes[v].parent.type === "Group") nodes[v].parent.visible = true
+          if (nodes[v].children) {
+            nodes[v].children.forEach(child => {
+              child.visible = true
+            })
+          }
+        }
+      })
+    }
+
+    if (preset.showContains) {
+      preset.showContains.forEach( v => {
+        Object.keys(nodes).forEach(o => {
+          if (o.includes(v)) {
+            console.log(o, nodes[o])
+            nodes[o].visible = true
+            if (nodes[o].parent.type === "Group") nodes[o].parent.visible = true
+            nodes[o].children.forEach(child => {
+              child.visible = true
+            })
+          }
+        })
       })
     }
 
