@@ -32,10 +32,15 @@ const Items = ({ id, url, index, preset, name, canvasRef, transformControlsRef, 
         
         // Only select images if nothing else is selected
         if (transformControlsRef.current.object) return
+        
+        const rect = event.currentTarget.getBoundingClientRect();
+        mouse.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.current.setFromCamera(mouse.current, camera);
 
-        mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1
-        mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1
-        raycaster.current.setFromCamera(mouse.current, camera)
+        // mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1
+        // mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1
+        // raycaster.current.setFromCamera(mouse.current, camera)
 
         const intersects = raycaster.current.intersectObjects(scene.children, true)
         for (let i=0; i < intersects.length; i++) {
@@ -83,24 +88,24 @@ const Items = ({ id, url, index, preset, name, canvasRef, transformControlsRef, 
     }
 
     if (preset.hidden) {
-	  if (preset.hidden.length === 1 && preset.hidden[0] === "SHOW") {
-		// Hide all nodes except main node
-		Object.keys(nodes).forEach(meshName => {
-		  const node = nodes[meshName]
-		  if (node.type !== "Mesh" && node.type !== "Group" && node.type !== "SkinnedMesh") return
-		  node.visible = false
-		  node.frustumCulled = false
-		})
-		if (nodes.Scene) nodes.Scene.visible = true
-		if (nodes[preset.mainNode]) {
-			nodes[preset.mainNode].visible = true
-			if (nodes[preset.mainNode].type === "Group") {
-				nodes[preset.mainNode].children.forEach(child => child.visible = true)
-			}
-		}
-		else {
-			console.log("Cannot find: ", preset.mainNode, nodes)
-		}
+      if (preset.hidden.length === 1 && preset.hidden[0] === "SHOW") {
+      // Hide all nodes except main node
+      Object.keys(nodes).forEach(meshName => {
+        const node = nodes[meshName]
+        if (node.type !== "Mesh" && node.type !== "Group" && node.type !== "SkinnedMesh") return
+        node.visible = false
+        node.frustumCulled = false
+      })
+      if (nodes.Scene) nodes.Scene.visible = true
+      if (nodes[preset.mainNode]) {
+        nodes[preset.mainNode].visible = true
+        if (nodes[preset.mainNode].type === "Group") {
+          nodes[preset.mainNode].children.forEach(child => child.visible = true)
+        }
+      }
+      else {
+        console.log("Cannot find: ", preset.mainNode, nodes)
+      }
 	  }
 	  else {
 		  // Only Hide specified hidden nodes

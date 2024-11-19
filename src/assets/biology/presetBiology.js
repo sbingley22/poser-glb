@@ -1,4 +1,5 @@
 import glbBio from "./HumanoidCellsPoser.glb?url"
+import glbProps from "./CellProps.glb?url"
 import poses from "../poses.json"
 
 export const presetModels = {
@@ -145,6 +146,38 @@ export const presetModels = {
 }
 
 export const presetProps = {
+  Antibody: {
+    url: glbProps,
+    preset: {
+      hidden: ["SHOW"],
+      show: ["Antibody"],
+      mainNode: "Antibody",
+    }
+  },
+  Cytokine: {
+    url: glbProps,
+    preset: {
+      hidden: ["SHOW"],
+      show: ["Cytokine"],
+      mainNode: "Cytokine",
+    }
+  },
+  GranzymeBomb: {
+    url: glbProps,
+    preset: {
+      hidden: ["SHOW"],
+      show: ["GranzymeBomb"],
+      mainNode: "GranzymeBomb",
+    }
+  },
+  ROS: {
+    url: glbProps,
+    preset: {
+      hidden: ["SHOW"],
+      show: ["ROS"],
+      mainNode: "ROS",
+    }
+  },
 }
 
 export const presetEnviroments = {
