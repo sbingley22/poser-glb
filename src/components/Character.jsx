@@ -433,7 +433,7 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
       preset.showContains.forEach( v => {
         Object.keys(nodes).forEach(o => {
           if (o.includes(v)) {
-            console.log(o, nodes[o])
+            // console.log(o, nodes[o])
             nodes[o].visible = true
             if (nodes[o].parent.type === "Group") nodes[o].parent.visible = true
             nodes[o].children.forEach(child => {
@@ -567,6 +567,7 @@ const Character = ({ id, url, index, name, preset, position, rotation, canvasRef
 
       const char = getCharacter()
       if (char === "") return {}
+      if (preset.noSkinTextures) return {}
       
       // Get skin textures
       const charNode = nodes[char]
